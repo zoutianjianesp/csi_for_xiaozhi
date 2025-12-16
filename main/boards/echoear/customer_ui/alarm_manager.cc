@@ -1,7 +1,6 @@
 #include <string.h>  /* For strcmp */
 #include <esp_log.h>
 #include <esp_lv_adapter.h>
-#include <mmap_generate_storage.h>
 #include "alarm_manager.h"
 #include "alarm_api.h"
 
