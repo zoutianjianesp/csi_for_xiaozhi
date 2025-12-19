@@ -31,6 +31,7 @@ private:
     int64_t last_heartbeat_time_;
     esp_timer_handle_t heartbeat_check_timer_;
     SemaphoreHandle_t calibrate_semaphore_;
+    
     static constexpr int64_t HEARTBEAT_TIMEOUT_MS = 2000;  // 2 seconds timeout
 
     static void HeartbeatCheckTimerCallback(void* arg);

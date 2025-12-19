@@ -18,6 +18,7 @@
 static lv_obj_t *container_pomodoro = NULL;
 static lv_obj_t *container_sleep = NULL;
 static lv_obj_t *container_time_up = NULL;
+static lv_obj_t *container_muyu = NULL;
 
 
 // ============================================================================
@@ -55,6 +56,10 @@ void alarm_create_ui()
     /* Create and register sleep container */
     container_sleep = alarm_sleep_24h_create_with_parent(scr);
     ui_bridge_register_page_with_cycle(PAGE_SLEEP, &container_sleep, true);
+
+    /* Create and register muuyu container */
+    container_muyu = alarm_muyu_create_with_parent(scr);
+    ui_bridge_register_page_with_cycle(PAGE_MUYU, &container_muyu, true);
 
     /* Create and register time up container */
     container_time_up = alarm_time_up_create_with_parent(scr);

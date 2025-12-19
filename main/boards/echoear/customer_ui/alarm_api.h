@@ -79,6 +79,23 @@ void alarm_set_sleep_end_time(int32_t end_hour, int32_t end_min);
  */
 bool alarm_get_sleep_end_time(int32_t *end_hour, int32_t *end_min);
 
+/**
+ * @brief Click the muyu
+ *
+ * Play click muyu animation
+ *
+ */
+void muyu_click_event(void);
+
+/**
+ * @brief LVGL callback for muyu click event
+ *
+ * This function is called in LVGL context to safely trigger
+ * the muyu click animation and related UI effects.
+ *
+ * @param arg User data passed by LVGL (unused)
+ */
+void lvgl_muyu_click_cb(void* arg);
 #ifdef __cplusplus
 }
 #endif

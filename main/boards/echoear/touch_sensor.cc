@@ -40,30 +40,60 @@ static button_handle_t touch_btn_handle[2] = {NULL, NULL};
 static void touch_btn_event_cb(void *button_handle, void *usr_data)
 {
     button_event_t event = iot_button_get_event((button_handle_t)button_handle);
+
+    constexpr int PRESS_DOWN_TRIGGER_COUNT = 3;
+    constexpr int PRESS_DOWN_TIME_WINDOW_MS = 1000; // 1 秒内三次
+
+    static int press_down_count = 0;
+    static int64_t first_press_time_ms = 0;
+
+    int64_t now_ms = esp_timer_get_time() / 1000; // us -> ms
+
     switch (event) {
-    case BUTTON_PRESS_DOWN:
+
+    case BUTTON_PRESS_DOWN: {
         ESP_LOGD(TAG, "Press down");
+
+        if (press_down_count == 0) {
+            first_press_time_ms = now_ms;
+        }
+
+        press_down_count++;
+
+        if (now_ms - first_press_time_ms > PRESS_DOWN_TIME_WINDOW_MS) {
+            press_down_count = 1;
+            first_press_time_ms = now_ms;
+        }
+
+        if (press_down_count >= PRESS_DOWN_TRIGGER_COUNT) {
+            ESP_LOGI(TAG, "Triple PRESS_DOWN detected!");
+
+            Display* display = Board::GetInstance().GetDisplay();
+            if (display != nullptr) {
+                std::string wake_word = "我在摸你猫头";
+                Application::GetInstance().WakeWordInvoke(wake_word);
+            }
+
+            press_down_count = 0;
+            first_press_time_ms = 0;
+        }
+
         break;
+    }
+
     case BUTTON_PRESS_UP:
         ESP_LOGD(TAG, "Press up");
         break;
+
     case BUTTON_SINGLE_CLICK:
         ESP_LOGD(TAG, "Single click");
         break;
-    case BUTTON_LONG_PRESS_START: {
-        ESP_LOGI(TAG, "Long press started");
-        Display* display = Board::GetInstance().GetDisplay();
-        if (display == nullptr) {
-            return;
-        }
-        std::string wake_word = "我在摸你猫头";
-        Application::GetInstance().WakeWordInvoke(wake_word);
-        break;
-    }
+
     default:
         break;
     }
 }
+
 
 #if TOUCH_SLIDER_ENABLED
 // Touch gesture coordination variables (for shared channels 6&7)
