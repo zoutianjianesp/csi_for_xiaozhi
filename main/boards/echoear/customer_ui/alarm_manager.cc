@@ -156,3 +156,31 @@ bool alarm_get_sleep_end_time(int32_t *end_hour, int32_t *end_min)
     /* Delegate to sleep_24h module */
     return alarm_sleep_24h_get_end_time(end_hour, end_min);
 }
+
+bool alarm_toggle_sleep_duration_display(void)
+{
+    ESP_LOGI(TAG, "Toggle sleep duration display");
+    const char *current_page = ui_bridge_get_current_page();
+    if (current_page == NULL || strcmp(current_page, PAGE_SLEEP) != 0) {
+        ESP_LOGI(TAG, "Not on sleep page (current=%s)",
+                 current_page ? current_page : "NULL");
+        return false;
+    } else {
+        alarm_sleep_24h_trigger_center_btn();
+    }
+    return true;
+}
+
+bool alarm_time_up_snooze(void)
+{
+    ESP_LOGI(TAG, "Time up snooze");
+    const char *current_page = ui_bridge_get_current_page();
+    if (current_page == NULL || strcmp(current_page, PAGE_TIME_UP) != 0) {
+        ESP_LOGI(TAG, "Not on time up page (current=%s)",
+                 current_page ? current_page : "NULL");
+        return false;
+    } else {
+        alarm_time_up_snooze_impl();
+    }
+    return true;
+}

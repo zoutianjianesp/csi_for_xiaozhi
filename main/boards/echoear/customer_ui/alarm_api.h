@@ -80,12 +80,26 @@ void alarm_set_sleep_end_time(int32_t end_hour, int32_t end_min);
 bool alarm_get_sleep_end_time(int32_t *end_hour, int32_t *end_min);
 
 /**
- * @brief Click the muyu
+ * @brief Toggle sleep timer duration display
  *
- * Play click muyu animation
+ * Toggles between showing time range and duration display on the sleep timer page.
+ * Only works when the sleep timer page is currently active.
  *
+ * @return true if successful, false if not on sleep timer page
  */
-void muyu_click_event(void);
+bool alarm_toggle_sleep_duration_display(void);
+
+/**
+ * @brief Trigger snooze action on time up page
+ *
+ * Performs snooze action (remind later 5 minutes) when on time up page.
+ * - If origin is SLEEP: snooze sleep timer by 5 minutes
+ * - If origin is POMODORO: start new 5-minute pomodoro timer
+ * - Otherwise: switch to home page
+ *
+ * @return true if successful, false if not on time up page
+ */
+bool alarm_time_up_snooze(void);
 
 /**
  * @brief LVGL callback for muyu click event
@@ -95,7 +109,7 @@ void muyu_click_event(void);
  *
  * @param arg User data passed by LVGL (unused)
  */
-void lvgl_muyu_click_cb(void* arg);
+void lvgl_muyu_click(void);
 #ifdef __cplusplus
 }
 #endif

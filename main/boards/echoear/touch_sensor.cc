@@ -42,7 +42,7 @@ static void touch_btn_event_cb(void *button_handle, void *usr_data)
     button_event_t event = iot_button_get_event((button_handle_t)button_handle);
 
     constexpr int PRESS_DOWN_TRIGGER_COUNT = 3;
-    constexpr int PRESS_DOWN_TIME_WINDOW_MS = 1000; // 1 秒内三次
+    constexpr int PRESS_DOWN_TIME_WINDOW_MS = 1500; // 1.5 秒内三次
 
     static int press_down_count = 0;
     static int64_t first_press_time_ms = 0;
@@ -52,7 +52,7 @@ static void touch_btn_event_cb(void *button_handle, void *usr_data)
     switch (event) {
 
     case BUTTON_PRESS_DOWN: {
-        ESP_LOGD(TAG, "Press down");
+        ESP_LOGI(TAG, "Press down:%d", press_down_count);
 
         if (press_down_count == 0) {
             first_press_time_ms = now_ms;
@@ -68,14 +68,16 @@ static void touch_btn_event_cb(void *button_handle, void *usr_data)
         if (press_down_count >= PRESS_DOWN_TRIGGER_COUNT) {
             ESP_LOGI(TAG, "Triple PRESS_DOWN detected!");
 
-            Display* display = Board::GetInstance().GetDisplay();
-            if (display != nullptr) {
+            auto &app = Application::GetInstance();
+            if (app.GetDeviceState() == kDeviceStateIdle) {
                 std::string wake_word = "我在摸你猫头";
-                Application::GetInstance().WakeWordInvoke(wake_word);
+                app.WakeWordInvoke(wake_word);
             }
 
             press_down_count = 0;
             first_press_time_ms = 0;
+        } else {
+            ESP_LOGI(TAG, "Press down count: %d", press_down_count);
         }
 
         break;
@@ -172,7 +174,7 @@ static void touch_slider_callback(touch_slider_handle_t handle, touch_slider_eve
         break;
 
     case TOUCH_SLIDER_EVENT_RELEASE:
-        ESP_LOGI(TAG, "swipe detected: %s",
+        ESP_LOGD(TAG, "swipe detected: %s",
                  is_sliding_detected ? "YES" : "NO");
 
         // Reset gesture state

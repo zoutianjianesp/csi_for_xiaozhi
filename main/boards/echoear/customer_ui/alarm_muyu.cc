@@ -36,7 +36,6 @@ typedef struct {
 } fish_ui_t;
 
 static muyuplay_ui_t s_muyuplay_ui;
-static fish_ui_t s_fish_ui;
 static bool screen_change_next = false;
 
 static void gongde_anim_finish_cb(lv_anim_t * a)
@@ -129,8 +128,11 @@ void muyu_click_event(){
     }
 }
 
-void lvgl_muyu_click_cb(void* arg) {
-    muyu_click_event();  // 原来的逻辑
+void lvgl_muyu_click() 
+{
+    esp_lv_adapter_lock(-1);
+    muyu_click_event(); 
+    esp_lv_adapter_unlock();
 }
 
 static void muyu_img_event_handler(lv_event_t *e)
@@ -190,6 +192,8 @@ lv_obj_t *alarm_muyu_create_with_parent(lv_obj_t *parent)
 
     lv_obj_add_event_cb(s_muyuplay_ui.muyu_img, muyu_img_event_handler, LV_EVENT_CLICKED, NULL);
     lv_obj_update_layout(s_muyuplay_ui.container);
+
+    lv_obj_add_flag(s_muyuplay_ui.container, LV_OBJ_FLAG_HIDDEN);
 
     return s_muyuplay_ui.container;
 }
