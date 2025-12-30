@@ -63,7 +63,7 @@ set(BUILTIN_TEXT_FONT font_puhui_14_1)
 set(BUILTIN_ICON_FONT font_awesome_14_1)
 
 set(ASSETS_EXTERNAL_PATH "")
-set(BUILD_RESOLUTION "320_240")
+set(ASSETS_RESOLUTION "320_240")
 
 # Add board files according to BOARD_TYPE
 # Set default assets if the board uses partition table V2
@@ -215,7 +215,7 @@ elseif(CONFIG_BOARD_TYPE_ECHOEAR)
     set(BUILTIN_TEXT_FONT font_puhui_20_4)
     set(BUILTIN_ICON_FONT font_awesome_20_4)
     set(DEFAULT_EMOJI_COLLECTION twemoji_64)
-    set(BUILD_RESOLUTION "360_360")
+    set(ASSETS_RESOLUTION "360_360")
     set(ASSETS_EXTERNAL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boards/echoear/assets")
 elseif(CONFIG_BOARD_TYPE_WAVESHARE_S3_AUDIO_BOARD)
     set(BOARD_TYPE "waveshare-s3-audio-board")
@@ -919,7 +919,7 @@ if ("${size}" AND "${offset}")
         set(ASSETS_PARTITION "assets")
 
         set(ASSETS_FILE "${CMAKE_BINARY_DIR}/${ASSETS_NAME}.bin")
-        build_speaker_assets_bin("${ASSETS_PARTITION}" ${BUILD_RESOLUTION} ${ASSETS_FILE} ${CONFIG_MMAP_FILE_NAME_LENGTH} ${ASSETS_EXTERNAL_PATH})
+        build_speaker_assets_bin("${ASSETS_PARTITION}" ${ASSETS_RESOLUTION} ${ASSETS_FILE} ${CONFIG_MMAP_FILE_NAME_LENGTH} ${ASSETS_EXTERNAL_PATH})
         message(STATUS "Generated emote assets: ${ASSETS_FILE} -> ${ASSETS_PARTITION} partition")
         esptool_py_flash_to_partition(flash "${ASSETS_PARTITION}" "${ASSETS_FILE}")
     elseif(CONFIG_FLASH_NONE_ASSETS)

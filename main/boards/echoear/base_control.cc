@@ -77,8 +77,8 @@ void BaseControl::Initialize()
         return;
     }
 
-    // Initialize to offline state
-    echo_base_online_ = false;
+    // Initialize to online state
+    echo_base_online_ = true;
     last_heartbeat_time_ = 0;
 }
 
