@@ -70,7 +70,7 @@ static void touch_btn_event_cb(void *button_handle, void *usr_data)
 
             auto &app = Application::GetInstance();
             if (app.GetDeviceState() == kDeviceStateIdle) {
-                std::string wake_word = "我在摸你猫头";
+                std::string wake_word = Lang::Strings::PETTING_YOUR_HEAD;
                 app.WakeWordInvoke(wake_word);
             }
 

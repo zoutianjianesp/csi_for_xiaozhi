@@ -16,7 +16,7 @@
 #include "alarm_manager.h"
 #include "ui_helpers.h"
 
-#define GONGDE_THRESHOLD        50
+#define GONGDE_THRESHOLD        200
 #define LOTTIE_SIZE_HOR_MIN             (90)
 #define LOTTIE_SIZE_VER_MIN             (90)
 
@@ -42,6 +42,23 @@ static void gongde_anim_finish_cb(lv_anim_t * a)
 {
     lv_obj_set_style_text_opa(s_muyuplay_ui.gongde_txt, LV_OPA_TRANSP, 0);
     //lv_obj_add_flag(s_muyuplay_ui.muyu_img, LV_OBJ_FLAG_CLICKABLE);
+}
+
+
+static void muyushow_Animation(lv_obj_t *TargetObject, int delay)
+{
+    ui_anim_user_data_t *PropertyAnimation_0_user_data = (ui_anim_user_data_t *)lv_malloc(sizeof(ui_anim_user_data_t));;
+    PropertyAnimation_0_user_data->target = TargetObject;
+    lv_anim_t PropertyAnimation_0;
+    lv_anim_init(&PropertyAnimation_0);
+    lv_anim_set_time(&PropertyAnimation_0, 300);
+    lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
+    lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_image_zoom);
+    lv_anim_set_values(&PropertyAnimation_0, 160, 220);
+    lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_overshoot);
+    lv_anim_set_delay(&PropertyAnimation_0, delay);
+    lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);
+    lv_anim_start(&PropertyAnimation_0);
 }
 
 static lv_anim_t * Anime1_Animation(lv_obj_t * TargetObject, int delay)
@@ -90,41 +107,24 @@ static lv_anim_t * Anime1_Animation(lv_obj_t * TargetObject, int delay)
     return out_anim;
 }
 
-static void muyushow_Animation(lv_obj_t *TargetObject, int delay)
-{
-    ui_anim_user_data_t *PropertyAnimation_0_user_data = (ui_anim_user_data_t *)lv_malloc(sizeof(ui_anim_user_data_t));;
-    PropertyAnimation_0_user_data->target = TargetObject;
-    lv_anim_t PropertyAnimation_0;
-    lv_anim_init(&PropertyAnimation_0);
-    lv_anim_set_time(&PropertyAnimation_0, 300);
-    lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
-    lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_image_zoom);
-    lv_anim_set_values(&PropertyAnimation_0, 120, 150);
-    lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_overshoot);
-    lv_anim_set_delay(&PropertyAnimation_0, delay);
-    lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);
-    lv_anim_start(&PropertyAnimation_0);
-
-}
-
 void muyu_click_event(){
     auto& app = Application::GetInstance();
     ESP_LOGI(TAG, "Muyu clicked - switching start/pause");
     lv_obj_set_style_text_opa(s_muyuplay_ui.gongde_txt, LV_OPA_MAX, 0);
-    lv_obj_align(s_muyuplay_ui.gongde_txt, LV_ALIGN_CENTER, -54, -50); 
+    lv_obj_align(s_muyuplay_ui.gongde_txt, LV_ALIGN_CENTER, -70, -100); 
     app.PlaySound(Lang::Sounds::OGG_MUYU);
     Anime1_Animation(s_muyuplay_ui.gongde_txt, 0);
     s_muyuplay_ui.gongde_sum_value = (s_muyuplay_ui.gongde_sum_value < GONGDE_THRESHOLD) ?  s_muyuplay_ui.gongde_sum_value + 1 : GONGDE_THRESHOLD;
     if (s_muyuplay_ui.gongde_sum_value >= GONGDE_THRESHOLD && !screen_change_next) {
         muyushow_Animation(s_muyuplay_ui.muyu_img, 0);
-        lv_label_set_text_fmt(s_muyuplay_ui.gongde_sum, "#f1c40f 功德圆满: %d#", s_muyuplay_ui.gongde_sum_value);
+        lv_label_set_text_fmt(s_muyuplay_ui.gongde_sum, "#f1c40f %s: %d#", Lang::Strings::FULL_MERIT, s_muyuplay_ui.gongde_sum_value);
         screen_change_next = true;
     } else if (s_muyuplay_ui.gongde_sum_value >= GONGDE_THRESHOLD && screen_change_next) {
         //_ui_screen_change(&ui_fish, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_fish_screen_init);
-        lv_label_set_text_fmt(s_muyuplay_ui.gongde_sum, "#f1c40f 功德圆满: %d#", s_muyuplay_ui.gongde_sum_value);
+        lv_label_set_text_fmt(s_muyuplay_ui.gongde_sum, "#f1c40f %s: %d#", Lang::Strings::FULL_MERIT, s_muyuplay_ui.gongde_sum_value);
     } else {
         muyushow_Animation(s_muyuplay_ui.muyu_img, 0);
-        lv_label_set_text_fmt(s_muyuplay_ui.gongde_sum, "#f1c40f 今日功德: %d#", s_muyuplay_ui.gongde_sum_value);
+        lv_label_set_text_fmt(s_muyuplay_ui.gongde_sum, "#f1c40f %s: %d#", Lang::Strings::TODAY_MERIT, s_muyuplay_ui.gongde_sum_value);
     }
 }
 
@@ -145,7 +145,6 @@ static void muyu_img_event_handler(lv_event_t *e)
 
 lv_obj_t *alarm_muyu_create_with_parent(lv_obj_t *parent)
 {
-    // 初始化状态
     s_muyuplay_ui.gongde_sum_value = 0;
 
     s_muyuplay_ui.container = lv_obj_create(parent);
@@ -155,19 +154,17 @@ lv_obj_t *alarm_muyu_create_with_parent(lv_obj_t *parent)
     lv_obj_set_style_pad_all(s_muyuplay_ui.container, 0, 0);
     lv_obj_clear_flag(s_muyuplay_ui.container, LV_OBJ_FLAG_SCROLLABLE);
 
-    /* ================= 木鱼图片 ================= */
     s_muyuplay_ui.muyu_img = lv_img_create(s_muyuplay_ui.container);
     lv_img_set_src(s_muyuplay_ui.muyu_img, &muyu_white);
-    lv_obj_align(s_muyuplay_ui.muyu_img, LV_ALIGN_CENTER, 0, 40);
+    lv_obj_align(s_muyuplay_ui.muyu_img, LV_ALIGN_CENTER, 0, -20);
     lv_obj_add_flag(s_muyuplay_ui.muyu_img, LV_OBJ_FLAG_CLICKABLE); 
     lv_obj_add_flag(s_muyuplay_ui.muyu_img, LV_OBJ_FLAG_ADV_HITTEST);
     lv_obj_clear_flag(s_muyuplay_ui.muyu_img, LV_OBJ_FLAG_SCROLLABLE);
-    lv_img_set_zoom(s_muyuplay_ui.muyu_img, 150);
+    lv_img_set_zoom(s_muyuplay_ui.muyu_img, 220);
 
-    /* ================= “功德+1” 文本 ================= */
     s_muyuplay_ui.gongde_txt = lv_label_create(s_muyuplay_ui.container);
-    lv_label_set_text(s_muyuplay_ui.gongde_txt, "功德+1");
-    lv_obj_align(s_muyuplay_ui.gongde_txt, LV_ALIGN_CENTER, -54, -50);
+    lv_label_set_text(s_muyuplay_ui.gongde_txt, Lang::Strings::MERIT);
+    lv_obj_align(s_muyuplay_ui.gongde_txt, LV_ALIGN_CENTER, -70, -100);
 
     lv_obj_set_style_text_color(s_muyuplay_ui.gongde_txt, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_text_opa(s_muyuplay_ui.gongde_txt, LV_OPA_TRANSP, 0);
@@ -176,24 +173,22 @@ lv_obj_t *alarm_muyu_create_with_parent(lv_obj_t *parent)
     lv_obj_set_style_blend_mode(s_muyuplay_ui.gongde_txt,
                                 LV_BLEND_MODE_NORMAL, 0);
 
-    /* ================= 今日功德 ================= */
     s_muyuplay_ui.gongde_sum = lv_label_create(s_muyuplay_ui.container);
     lv_label_set_recolor(s_muyuplay_ui.gongde_sum, true);
     lv_label_set_text_fmt(
         s_muyuplay_ui.gongde_sum,
-        "#f1c40f 今日功德: %d#",
+        "#f1c40f %s: %d#",
+        Lang::Strings::TODAY_MERIT,
         s_muyuplay_ui.gongde_sum_value
     );
     lv_obj_set_style_text_font(s_muyuplay_ui.gongde_sum,
                                &ui_font_Heiti18, 0);
     lv_obj_align_to(s_muyuplay_ui.gongde_sum,
                     s_muyuplay_ui.muyu_img,
-                    LV_ALIGN_TOP_RIGHT, 10, 15);
+                    LV_ALIGN_BOTTOM_MID, 0, 30);
 
     lv_obj_add_event_cb(s_muyuplay_ui.muyu_img, muyu_img_event_handler, LV_EVENT_CLICKED, NULL);
     lv_obj_update_layout(s_muyuplay_ui.container);
-
     lv_obj_add_flag(s_muyuplay_ui.container, LV_OBJ_FLAG_HIDDEN);
-
     return s_muyuplay_ui.container;
 }

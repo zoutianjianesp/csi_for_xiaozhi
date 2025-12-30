@@ -166,7 +166,7 @@ void BaseControl::HandleCommand(uint8_t cmd, uint8_t *data, int data_len)
 
                 auto &app = Application::GetInstance();
                 if (app.GetDeviceState() == kDeviceStateIdle) {
-                    std::string wake_word = "欢迎朋友来了";
+                    std::string wake_word = Lang::Strings::WELCOME_FRIEND;
                     app.WakeWordInvoke(wake_word);
                 }
                 break;

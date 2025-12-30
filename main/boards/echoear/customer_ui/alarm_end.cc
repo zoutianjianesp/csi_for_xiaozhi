@@ -12,6 +12,7 @@
 #include "alarm_manager.h"
 #include "alarm_api.h"
 #include "alarm_sleep_24h.h"
+#include "assets/lang_config.h"
 #include "application.h"
 
 static const char *TAG = "time_up";
@@ -88,13 +89,13 @@ void alarm_time_up_set_origin(const char *origin_page)
                 lv_obj_clear_flag(s_time_up_ui.remind_later_time_label, LV_OBJ_FLAG_HIDDEN);
             }
         }
-        std::string wake_word = "闹钟时间到";
+        std::string wake_word = Lang::Strings::ALARM_TIMEUP;
         Application::GetInstance().WakeWordInvoke(wake_word);
     } else if (origin_page != NULL && strcmp(origin_page, PAGE_POMODORO) == 0) {
         if (s_time_up_ui.remind_later_time_label) {
             lv_obj_add_flag(s_time_up_ui.remind_later_time_label, LV_OBJ_FLAG_HIDDEN);
         }
-        std::string wake_word = "番茄钟时间到";
+        std::string wake_word = Lang::Strings::POMODORO_TIMEUP;
         Application::GetInstance().WakeWordInvoke(wake_word);
     }
 }

@@ -140,10 +140,47 @@ EmoteDisplay::~EmoteDisplay()
 void EmoteDisplay::SetEmotion(const char* const emotion)
 {
     ESP_LOGI(TAG, "SetEmotion: %s", emotion);
+
     if (emote_handle_ && emotion && strlen(emotion) > 0) {
         emote_set_anim_emoji(emote_handle_, emotion);
     }
+
+    static const std::unordered_map<std::string, int> emotion_to_action_map = {
+        {"happy",       ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD},
+        {"laughing",    ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD},
+        {"funny",       ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD},
+        {"loving",      ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD},
+        {"confident",   ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD},
+        {"delicious",   ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD},
+        {"thinking",    ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD},
+
+        {"embarrassed", ECHO_BASE_CMD_SET_ACTION_CAT_NUZZLE},
+
+        {"sad",         ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY},
+        {"crying",      ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY},
+        {"sleepy",      ECHO_BASE_CMD_SET_ACTION_SHARK_HEAD_DECAY},
+
+        {"silly",       ECHO_BASE_CMD_SET_ACTION_LOOK_AROUND},
+        {"confused",    ECHO_BASE_CMD_SET_ACTION_LOOK_AROUND},
+
+        {"angry",       ECHO_BASE_CMD_SET_ACTION_BEAT_SWING},
+
+        {"surprised",   ECHO_BASE_CMD_SET_ACTION_LOOK_AROUND},
+        {"shocked",     ECHO_BASE_CMD_SET_ACTION_LOOK_AROUND},
+
+        {"winking",     ECHO_BASE_CMD_SET_ACTION_CAT_NUZZLE},
+
+        {"relaxed",     ECHO_BASE_CMD_SET_ACTION_LOOK_AROUND},
+    };
+
+    if (emotion) {
+        auto it = emotion_to_action_map.find(emotion);
+        if (it != emotion_to_action_map.end()) {
+            echo_base_control_set_action(it->second);
+        }
+    }
 }
+
 
 void EmoteDisplay::SetChatMessage(const char* const role, const char* const content)
 {
