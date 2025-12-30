@@ -235,14 +235,10 @@ bool EmoteDisplay::InsertAnimDialog(const char* emoji_name, uint32_t duration_ms
 
 void EmoteDisplay::RefreshAll()
 {
-    if (!emote_handle_) {
-        ESP_LOGI(TAG, "Refresh all: emote_handle_ is nullptr");
+    if (emote_handle_) {
+        emote_notify_all_refresh(emote_handle_);
         return;
     }
-
-    // Note: New emote API may not have explicit refresh_all
-    // Objects should refresh automatically when updated
-    (void)emote_handle_;
 }
 
 } // namespace emote
