@@ -3,13 +3,15 @@
 #include <esp_lv_adapter.h>
 #include "alarm_manager.h"
 #include "alarm_api.h"
+#include "csi_ui/ui/ui.h"
+#include "../esp_radar_csi.h"
 
 #define TAG "alarm_manager"
 
 // ============================================================================
 // Type Definitions
 // ============================================================================
-
+using esp_brookesia::apps::RadarCSI;
 // ============================================================================
 // Static Variables
 // ============================================================================
@@ -19,7 +21,8 @@ static lv_obj_t *container_pomodoro = NULL;
 static lv_obj_t *container_sleep = NULL;
 static lv_obj_t *container_time_up = NULL;
 static lv_obj_t *container_muyu = NULL;
-
+static lv_obj_t *container_screenW = NULL;
+static lv_obj_t *container_csi_behav = NULL;
 
 // ============================================================================
 // Global Variables
@@ -42,6 +45,19 @@ static bool main_ui_page_switch_callback(const char *target_page, void *user_dat
         alarm_start_pomodoro(5);
         return true;  /* Handled, skip default switch */
     }
+    if (target_page != NULL && strcmp(target_page, "SCREEN_W") == 0 &&
+            (current_page == NULL || strcmp(current_page, "SCREEN_W") != 0)) {
+        ESP_LOGI(TAG, "Start Pinging!");
+        RadarCSI::getInstance()->startPing();
+        //return true;  /* Handled, skip default switch */
+    }
+    if (current_page != NULL && strcmp(current_page, "SCREEN_W") == 0 &&
+        (target_page == NULL || strcmp(target_page, "SCREEN_W") != 0)) {
+        ESP_LOGI(TAG, "Stop Pinging!");
+        RadarCSI::getInstance()->stopPing();
+        //return true;  /* Handled, skip default switch */
+    }
+
 
     return false;  /* Use default switch */
 }
@@ -64,6 +80,13 @@ void alarm_create_ui()
     /* Create and register time up container */
     container_time_up = alarm_time_up_create_with_parent(scr);
     ui_bridge_register_page_with_cycle(PAGE_TIME_UP, &container_time_up, false);
+    /* Create and register screenW container */
+    container_screenW = ui_ScreenW_init(scr);
+    ui_bridge_register_page_with_cycle("SCREEN_W", &container_screenW, true);
+
+    /* Create and register csi_light container */
+    container_csi_behav = ui_csi_behav_init(scr);
+    ui_bridge_register_page_with_cycle("CSI_BEHAV", &container_csi_behav, true);
 
     /* Register page switch callback for custom handling (e.g., pomodoro) */
     ui_bridge_set_page_switch_callback(main_ui_page_switch_callback, NULL);
