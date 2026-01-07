@@ -10,7 +10,7 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>  /* For strcmp */
-#include "alarm_manager.h"
+#include "custom_ui.h"
 #include "alarm_api.h"
 #include "alarm_end.h"
 
@@ -268,7 +268,7 @@ static void time_update_timer_cb(lv_timer_t *timer)
         ESP_LOGI(TAG, "Time up, end time: %02ld:%02ld", (long)end_hour, (long)end_min);
         ui->has_jumped_to_time_up = true;
         alarm_time_up_set_origin(PAGE_SLEEP);
-        main_ui_switch_page(PAGE_TIME_UP);
+        ui_bridge_switch_page(PAGE_TIME_UP);
         return;
     } else if (end_total_sec != current_total_sec) {
         ui->has_jumped_to_time_up = false;

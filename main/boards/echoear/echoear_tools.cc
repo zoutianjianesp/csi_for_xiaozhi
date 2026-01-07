@@ -6,9 +6,8 @@
 #include "board.h"
 #include "assets/lang_config.h"
 #include <esp_log.h>
-#include "customer_ui/alarm_api.h"
-#include "customer_ui/alarm_manager.h"
-#include "ui_bridge.h"
+#include "custom_ui.h"
+
 #define TAG "EchoEarTools"
 
 void EchoEarTools::Initialize(EspS3Cat* board)
@@ -68,7 +67,7 @@ void EchoEarTools::Initialize(EspS3Cat* board)
             }
         } else if (action == "go_home")
         {
-            main_ui_switch_page(UI_BRIDGE_PAGE_HOME);
+            ui_bridge_switch_page(UI_BRIDGE_PAGE_HOME);
         } else
         {
             return false;

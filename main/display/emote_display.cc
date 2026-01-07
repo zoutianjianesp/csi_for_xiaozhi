@@ -16,6 +16,7 @@
 #include <esp_timer.h>
 #include <esp_lv_adapter.h>
 #include <lvgl.h>
+#include <esp_psram.h>
 
 // FreeRTOS headers
 #include <freertos/FreeRTOS.h>
@@ -28,6 +29,7 @@
 #include "gfx.h"
 #include "echo_base_control.h"
 #include "expression_emote.h"
+#include "ui_bridge.h"
 
 LV_FONT_DECLARE(BUILTIN_TEXT_FONT);
 
@@ -274,6 +276,66 @@ void EmoteDisplay::RefreshAll()
         emote_notify_all_refresh(emote_handle_);
         return;
     }
+}
+
+void EmoteDisplay::InitCustomUI(esp_lcd_panel_io_handle_t panel_io, 
+                                   esp_lcd_panel_handle_t panel,
+                                   int width, int height, 
+                                   int offset_x, int offset_y, 
+                                   bool mirror_x, bool mirror_y, bool swap_xy,
+                                   EmoteDisplay *display)
+{
+    lv_init();
+
+#if CONFIG_SPIRAM
+    // LV image cache, currently only PNG is supported
+    size_t psram_size_mb = esp_psram_get_size() / 1024 / 1024;
+    if (psram_size_mb >= 8) {
+        lv_image_cache_resize(2 * 1024 * 1024, true);
+        ESP_LOGI(TAG, "Use 2MB of PSRAM for image cache");
+    } else if (psram_size_mb >= 2) {
+        lv_image_cache_resize(512 * 1024, true);
+        ESP_LOGI(TAG, "Use 512KB of PSRAM for image cache");
+    }
+#endif
+
+    ESP_LOGI(TAG, "Initializing LVGL adapter, width:%d, height:%d", width, height);
+    esp_lv_adapter_config_t adapter_config = ESP_LV_ADAPTER_DEFAULT_CONFIG();
+    adapter_config.task_priority = 6;
+    adapter_config.task_core_id = 0;
+    adapter_config.tick_period_ms = 5;
+    adapter_config.task_min_delay_ms = 10;
+    adapter_config.task_max_delay_ms = 100;
+    adapter_config.stack_in_psram = false;
+    ESP_ERROR_CHECK(esp_lv_adapter_init(&adapter_config));
+
+    esp_lv_adapter_display_config_t display_config = ESP_LV_ADAPTER_DISPLAY_SPI_WITH_PSRAM_DEFAULT_CONFIG(
+                                                         panel,
+                                                         panel_io,
+                                                         static_cast<uint16_t>(width),
+                                                         static_cast<uint16_t>(height),
+                                                         ESP_LV_ADAPTER_ROTATE_0);
+    display_config.profile.use_psram = true;
+    display_config.profile.require_double_buffer = true;
+
+    lv_display_t *lv_display = esp_lv_adapter_register_display(&display_config);
+    if (lv_display == nullptr) {
+        ESP_LOGE(TAG, "Failed to add display");
+        return;
+    }
+
+    if (offset_x != 0 || offset_y != 0) {
+        lv_display_set_offset(lv_display, offset_x, offset_y);
+    }
+
+    ESP_LOGI(TAG, "Starting LVGL adapter");
+    esp_lv_adapter_set_dummy_draw(lv_display, true);
+    esp_lv_adapter_start();
+
+    esp_lv_adapter_lock(-1);
+    /* Pass the display pointer directly to avoid Board::GetInstance() call */
+    ui_bridge_init(display);
+    esp_lv_adapter_unlock();
 }
 
 } // namespace emote

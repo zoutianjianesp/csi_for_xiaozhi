@@ -4,7 +4,7 @@
 // Project name: C5_Dual_antenna
 
 #include "../ui.h"
-#include "../../../alarm_manager.h"
+#include "../../../custom_ui.h"
 
 lv_obj_t *ui_ScreenW_screen_init(lv_obj_t *parent)
 {
@@ -122,7 +122,7 @@ lv_obj_t *ui_ScreenW_screen_init(lv_obj_t *parent)
     lv_obj_set_style_text_font(ui_ScreenW_LabelPointSelect, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     /* ================= Layout finalize ================= */
-    lv_obj_update_layout(ui_ScreenW);
+    // lv_obj_update_layout(ui_ScreenW);
 
     /* 默认隐藏，由页面管理器控制显示 */
     lv_obj_add_flag(ui_ScreenW, LV_OBJ_FLAG_HIDDEN);

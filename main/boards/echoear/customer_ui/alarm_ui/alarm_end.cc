@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-#include "alarm_manager.h"
+#include "custom_ui.h"
 #include "alarm_api.h"
 #include "alarm_sleep_24h.h"
 #include "assets/lang_config.h"
@@ -50,7 +50,7 @@ void alarm_time_up_snooze_impl(void)
         }
         s_time_up_ui.origin_page = NULL;  /* Clear origin after use */
     } else {
-        main_ui_switch_page(UI_BRIDGE_PAGE_HOME);
+        ui_bridge_switch_page(UI_BRIDGE_PAGE_HOME);
     }
 }
 
@@ -63,7 +63,7 @@ static void slider_event_handler(lv_event_t *e)
         int32_t value = lv_slider_get_value(slider);
         if (value >= 100) {
             lv_slider_set_value(slider, 0, LV_ANIM_ON);
-            main_ui_switch_page(UI_BRIDGE_PAGE_HOME);
+            ui_bridge_switch_page(UI_BRIDGE_PAGE_HOME);
         }
     } else if (code == LV_EVENT_RELEASED) {
         int32_t value = lv_slider_get_value(slider);

@@ -4,7 +4,7 @@
  * Opts: --bpp 4 --size 24 --font C:/Users/zoutianjian/SquareLine/assets/SourceHanSansCN-Medium.otf -o C:/Users/zoutianjian/SquareLine/assets\ui_font_Heiti24.c --format lvgl -r 0x20-0x7f --symbols 功德+1 --no-compress --no-prefilter
  ******************************************************************************/
 
-#include "../alarm_manager.h"
+#include "../custom_ui.h"
 
 #ifndef UI_FONT_HEITI24
 #define UI_FONT_HEITI24 1

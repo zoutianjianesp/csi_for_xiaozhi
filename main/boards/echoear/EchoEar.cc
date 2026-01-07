@@ -17,6 +17,7 @@
 #include "echoear_tools.h"
 #include "touch_sensor.h"
 #include "ui_bridge.h"
+#include "custom_ui.h"
 
 #include <wifi_station.h>
 #include <esp_log.h>
@@ -140,64 +141,6 @@ void EspS3Cat::InitializeSpi()
     ESP_ERROR_CHECK(spi_bus_initialize(QSPI_LCD_HOST, &bus_config, SPI_DMA_CH_AUTO));
 }
 
-void start_lvgl(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_handle_t panel,
-                int width, int height, int offset_x, int offset_y, bool mirror_x, bool mirror_y, bool swap_xy,
-                Display *display)
-{
-    lv_init();
-
-#if CONFIG_SPIRAM
-// lv image cache, currently only PNG is supported
-    size_t psram_size_mb = esp_psram_get_size() / 1024 / 1024;
-    if (psram_size_mb >= 8) {
-        lv_image_cache_resize(2 * 1024 * 1024, true);
-        ESP_LOGI(TAG, "Use 2MB of PSRAM for image cache");
-    } else if (psram_size_mb >= 2) {
-        lv_image_cache_resize(512 * 1024, true);
-        ESP_LOGI(TAG, "Use 512KB of PSRAM for image cache");
-    }
-#endif
-
-    ESP_LOGI(TAG, "Initializing LVGL adapter, width:%d, height:%d", width, height);
-    esp_lv_adapter_config_t adapter_config = ESP_LV_ADAPTER_DEFAULT_CONFIG();
-    adapter_config.task_priority = 6;
-    adapter_config.task_core_id = 0;
-    adapter_config.tick_period_ms = 5;
-    adapter_config.task_min_delay_ms = 10;
-    adapter_config.task_max_delay_ms = 100;
-    adapter_config.stack_in_psram = false;
-    ESP_ERROR_CHECK(esp_lv_adapter_init(&adapter_config));
-
-    esp_lv_adapter_display_config_t display_config = ESP_LV_ADAPTER_DISPLAY_SPI_WITH_PSRAM_DEFAULT_CONFIG(
-                                                         panel,
-                                                         panel_io,
-                                                         static_cast<uint16_t>(width),
-                                                         static_cast<uint16_t>(height),
-                                                         ESP_LV_ADAPTER_ROTATE_0);
-    display_config.profile.use_psram = true;
-    // display_config.profile.buffer_height = 20;
-    display_config.profile.require_double_buffer = true;
-
-    lv_display_t *display_ = esp_lv_adapter_register_display(&display_config);
-    if (display_ == nullptr) {
-        ESP_LOGE(TAG, "Failed to add display");
-        return;
-    }
-
-    if (offset_x != 0 || offset_y != 0) {
-        lv_display_set_offset(display_, offset_x, offset_y);
-    }
-
-    ESP_LOGI(TAG, "Starting LVGL adapter");
-    esp_lv_adapter_set_dummy_draw(display_, true);
-    esp_lv_adapter_start();
-
-    esp_lv_adapter_lock(-1);
-    /* Pass the display pointer directly to avoid Board::GetInstance() call */
-    ui_bridge_init(display);
-    esp_lv_adapter_unlock();
-}
-
 void EspS3Cat::Initializest77916Display()
 {
     esp_lcd_panel_io_handle_t panel_io = nullptr;
@@ -232,7 +175,11 @@ void EspS3Cat::Initializest77916Display()
 
 #if CONFIG_USE_EMOTE_MESSAGE_STYLE
     display_ = new emote::EmoteDisplay(panel, panel_io, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    start_lvgl(panel_io, panel, DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_OFFSET_X, DISPLAY_OFFSET_Y, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y, DISPLAY_SWAP_XY, display_);
+    emote::EmoteDisplay::InitCustomUI(panel_io, panel, DISPLAY_WIDTH, DISPLAY_HEIGHT, 
+                                         DISPLAY_OFFSET_X, DISPLAY_OFFSET_Y, 
+                                         DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y, DISPLAY_SWAP_XY, 
+                                         static_cast<emote::EmoteDisplay*>(display_));
+    custom_ui_create();
 #else
     display_ = new SpiLcdDisplay(panel_io, panel,
                                  DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_OFFSET_X, DISPLAY_OFFSET_Y, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y, DISPLAY_SWAP_XY);

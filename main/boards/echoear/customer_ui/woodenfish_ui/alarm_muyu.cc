@@ -13,7 +13,7 @@
 #include "application.h"
 #include "assets/lang_config.h"
 #include "alarm_api.h"
-#include "alarm_manager.h"
+#include "custom_ui.h"
 #include "ui_helpers.h"
 
 #define GONGDE_THRESHOLD        200

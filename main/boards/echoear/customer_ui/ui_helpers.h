@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#include "alarm_manager.h"
+#include "custom_ui.h"
 
 #define _UI_TEMPORARY_STRING_BUFFER_SIZE 32
 #define _UI_BAR_PROPERTY_VALUE 0

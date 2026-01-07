@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>  /* For strcmp */
-#include "alarm_manager.h"
+#include "custom_ui.h"
 
 #define TIMER_MAX_SECONDS       (60 * 60)
 #define TIMER_INITIAL_SECONDS   (0 * 60)
@@ -264,7 +264,7 @@ static void timer_tick_cb(lv_timer_t *timer)
         if (ui->was_running_before_zero) {
             ESP_LOGI(TAG, "Pomodoro timer finished");
             alarm_time_up_set_origin(PAGE_POMODORO);
-            main_ui_switch_page(PAGE_TIME_UP);
+            ui_bridge_switch_page(PAGE_TIME_UP);
             ui->was_running_before_zero = false;
         } else {
             ESP_LOGI(TAG, "Timer set to 0 manually or initialized to 0 - no jump");
@@ -480,7 +480,7 @@ void alarm_pomodoro_toggle_start_pause(void)
     const char *current_page = ui_bridge_get_current_page();
     if (current_page == NULL || strcmp(current_page, PAGE_POMODORO) != 0) {
         ESP_LOGI(TAG, "Not on pomodoro page (current=%s), switching to pomodoro page", current_page ? current_page : "NULL");
-        main_ui_switch_page(PAGE_POMODORO);
+        ui_bridge_switch_page(PAGE_POMODORO);
     }
 
     esp_lv_adapter_lock(-1);

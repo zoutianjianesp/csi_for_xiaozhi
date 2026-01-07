@@ -16,14 +16,6 @@ extern "C" {
  */
 
 /**
- * @brief Initialize main UI
- *
- * Creates and registers all UI containers (pomodoro, sleep, time up).
- * This function should be called after the display is initialized.
- */
-void alarm_create_ui(void);
-
-/**
  * @brief Show pomodoro timer page with specified minutes
  *
  * Configures the pomodoro timer to the specified duration and switches to the pomodoro page.

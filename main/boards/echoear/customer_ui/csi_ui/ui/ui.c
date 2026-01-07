@@ -216,8 +216,8 @@ lv_obj_t *ui_ScreenW_init(lv_obj_t *parent){
 }
 
 lv_obj_t *ui_csi_behav_init(lv_obj_t *parent){     
-    lv_disp_t * dispp = lv_display_get_default();
-    lv_theme_t * theme = lv_theme_simple_init(dispp);
-    lv_disp_set_theme(dispp, theme);
+    // lv_disp_t * dispp = lv_display_get_default();
+    // lv_theme_t * theme = lv_theme_simple_init(dispp);
+    // lv_disp_set_theme(dispp, theme);
     return ui_csi_behav_Screen_screen_init(parent);
 }

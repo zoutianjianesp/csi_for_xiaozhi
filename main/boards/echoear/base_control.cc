@@ -9,8 +9,7 @@
 #include "device_state.h"
 #include <esp_log.h>
 #include <esp_timer.h>
-#include "customer_ui/alarm_manager.h"
-#include "customer_ui/alarm_api.h"
+#include "custom_ui.h"
 
 #define TAG "BaseControl"
 

@@ -32,6 +32,30 @@ public:
     // Get emote handle for internal use
     emote_handle_t GetEmoteHandle() const { return emote_handle_; }
 
+    /**
+     * @brief Initialize LVGL display system
+     * 
+     * This static method initializes the LVGL graphics library and adapter,
+     * registers the display, and initializes the UI bridge.
+     * 
+     * @param panel_io LCD panel IO handle
+     * @param panel LCD panel handle
+     * @param width Display width in pixels
+     * @param height Display height in pixels
+     * @param offset_x Display X offset
+     * @param offset_y Display Y offset
+     * @param mirror_x Mirror display horizontally
+     * @param mirror_y Mirror display vertically
+     * @param swap_xy Swap X and Y axes
+     * @param display Pointer to EmoteDisplay instance (for UI bridge initialization)
+     */
+    static void InitCustomUI(esp_lcd_panel_io_handle_t panel_io, 
+                                esp_lcd_panel_handle_t panel,
+                                int width, int height, 
+                                int offset_x, int offset_y, 
+                                bool mirror_x, bool mirror_y, bool swap_xy,
+                                EmoteDisplay *display);
+
 private:
     virtual bool Lock(int timeout_ms = 0) override;
     virtual void Unlock() override;
