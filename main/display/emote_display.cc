@@ -27,7 +27,7 @@
 #include "board.h"
 #include "gfx.h"
 #include "echo_base_control.h"
-#include "expression_emote/emote.h"
+#include "expression_emote.h"
 
 LV_FONT_DECLARE(BUILTIN_TEXT_FONT);
 
@@ -113,20 +113,9 @@ static emote_handle_t InitializeEmote(const esp_lcd_panel_handle_t panel, const 
 // ============================================================================
 
 EmoteDisplay::EmoteDisplay(const esp_lcd_panel_handle_t panel, const esp_lcd_panel_io_handle_t panel_io,
-                           const int width, const int height)
+    const int width, const int height)
 {
-    ESP_LOGE(TAG, "EmoteDisplay constructor");
-    (void)panel_io;
     emote_handle_ = InitializeEmote(panel, width, height);
-    if (emote_handle_) {
-        const emote_data_t data = {
-            .type = EMOTE_SOURCE_PARTITION,
-            .source = {
-                .partition_label = "assets",
-            },
-        };
-        emote_load_assets_from_source(emote_handle_, &data);
-    }
 }
 
 EmoteDisplay::~EmoteDisplay()
@@ -186,7 +175,16 @@ void EmoteDisplay::SetChatMessage(const char* const role, const char* const cont
 {
     ESP_LOGI(TAG, "SetChatMessage: %s, %s", role, content);
     if (emote_handle_ && content && strlen(content) > 0) {
-        emote_set_event_msg(emote_handle_, EMOTE_MGR_EVT_SPEAK, content);
+        if ((std::strcmp(role, "system") == 0) && std::strstr(content, "xiaozhi.me")) {
+            size_t len = strlen(content);
+            char* new_content = new char[len + 1];
+            strcpy(new_content, content);
+            std::replace(new_content, new_content + len, static_cast<char>(0x0A), static_cast<char>(0x20));
+            emote_set_event_msg(emote_handle_, EMOTE_MGR_EVT_SYS, new_content);
+            delete[] new_content;
+        } else {
+            emote_set_event_msg(emote_handle_, EMOTE_MGR_EVT_SPEAK, content);
+        }
     }
 }
 

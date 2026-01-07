@@ -46,11 +46,7 @@ dependencies:
   espressif/esp_io_expander_tca95xx_16bit: ^2.0.0
   espressif/esp_lvgl_adapter: ^0.1.0
   espressif2022/image_player: ^1.1.1
-  # espressif2022/esp_emote_gfx: ^2.0.0
-  # espressif2022/esp_emote_assets: ^0.0.3
-  espressif2022/esp_emote_expression: 
-    version: ^0.0.2
-    # override_path: /home/xuxin/esp_work/esp_emote_expression
+  espressif2022/esp_emote_expression: ^0.1.0
   espressif2022/echoear_base_control: ^0.0.3
   espfriends/beat_detection: ^1.0.0
   espfriends/audio_doa: ^1.2.0
