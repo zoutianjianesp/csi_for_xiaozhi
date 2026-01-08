@@ -34,7 +34,8 @@
 #define CONFIG_FORCE_GAIN   0   // 1:force gain control, 0:automatic gain control
 
 // 与路由器之间 ping 的频率（次/秒）
-#define CONFIG_SEND_FREQUENCY 50
+// #define CONFIG_SEND_FREQUENCY 50
+#define CONFIG_SEND_FREQUENCY 10
 
 static const char *TAG = "radar_csi";
 
@@ -576,17 +577,16 @@ bool RadarCSI::pushData(const csi_data_t &data)
         return false;
     }
 
-    // 处理 CSI 图表数据
-    processData();
-    // 处理 ScreenM 图表数据
-    processChartMData();
+    // // // 处理 CSI 图表数据
+    // processData();
+    // // // 处理 ScreenM 图表数据
+    // processChartMData();
     
     if (xQueueSend(csi_display_queue, &data, 0) != pdTRUE) {
         // 队列已满时，丢弃最旧的数据，再尝试写入最新数据，避免一直处于 full 状态
         csi_data_t dummy;
         (void)xQueueReceive(csi_display_queue, &dummy, 0);
         (void)xQueueSend(csi_display_queue, &data, 0);
-        // ESP_LOGW(TAG, "xQueueSend failed");
         return false;
     }
     
@@ -609,7 +609,6 @@ void RadarCSI::processData()
             continue;
         }
 
-        ESP_LOGW(TAG, "Processing data");
         UBaseType_t queueLength = uxQueueMessagesWaiting(csi_display_queue);
         if (queueLength > 10) {
             ESP_LOGW(TAG, "UI queue length: %d", queueLength);
@@ -813,4 +812,17 @@ void RadarCSI::resetChartState()
 }
 
 } // namespace esp_brookesia::apps
+
+// C interface implementations
+extern "C" {
+void radar_csi_process_data(void)
+{
+    esp_brookesia::apps::RadarCSI::getInstance()->processData();
+}
+
+void radar_csi_process_chart_m_data(void)
+{
+    esp_brookesia::apps::RadarCSI::getInstance()->processChartMData();
+}
+}
 

@@ -5,6 +5,36 @@
 
 #include "../ui.h"
 #include "../../../custom_ui.h"
+#include "ui_bridge.h"
+#include "../../esp_radar_csi.h"
+#include <string.h>
+#include <esp_log.h>
+
+#define TAG "ui_ScreenW"
+#define TIMER_UPDATE_PERIOD_MS  50
+
+typedef struct {
+    lv_timer_t *timer;
+} screenw_ui_t;
+
+static screenw_ui_t s_screenw_ui;
+
+static void timer_tick_cb(lv_timer_t *timer)
+{
+    (void)timer;  // Unused parameter
+
+    /* Check if current page is SCREEN_W page */
+    const char *current_page = ui_bridge_get_current_page();
+    if (current_page == NULL || strcmp(current_page, "SCREEN_W") != 0) {
+        return;
+    }
+
+    radar_csi_process_data();
+    radar_csi_process_chart_m_data();
+
+    /* Add your periodic update logic here */
+    // TODO: Add periodic update logic for ScreenW
+}
 
 lv_obj_t *ui_ScreenW_screen_init(lv_obj_t *parent)
 {
@@ -121,11 +151,12 @@ lv_obj_t *ui_ScreenW_screen_init(lv_obj_t *parent)
     lv_obj_set_style_text_opa(ui_ScreenW_LabelPointSelect, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_ScreenW_LabelPointSelect, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    /* ================= Layout finalize ================= */
-    // lv_obj_update_layout(ui_ScreenW);
 
     /* 默认隐藏，由页面管理器控制显示 */
     lv_obj_add_flag(ui_ScreenW, LV_OBJ_FLAG_HIDDEN);
+
+    /* Create timer for periodic updates */
+    s_screenw_ui.timer = lv_timer_create(timer_tick_cb, TIMER_UPDATE_PERIOD_MS, &s_screenw_ui);
 
     return ui_ScreenW;
 }

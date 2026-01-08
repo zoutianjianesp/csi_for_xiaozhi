@@ -25,9 +25,12 @@ typedef struct {
     uint8_t end[2];        
 } __attribute__((packed)) csi_data_t;
 
+// C interface for RadarCSI (for calling from C code)
+void radar_csi_process_data(void);
+void radar_csi_process_chart_m_data(void);
+
 #ifdef __cplusplus
-}
-#endif
+} // extern "C"
 
 namespace esp_brookesia::apps {
 
@@ -210,4 +213,6 @@ private:
 };
 
 } // namespace esp_brookesia::apps
+
+#endif // __cplusplus
 
