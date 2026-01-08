@@ -24,6 +24,7 @@
 #include "lwip/netdb.h"
 #include "lwip/sockets.h"
 #include "ping/ping_sock.h"
+#include "esp_lv_adapter.h"
 
 #define DISPLAY_SAMPLE_STEP 3
 #define LVGL_CHART_POINTS   (300 / DISPLAY_SAMPLE_STEP)
@@ -88,11 +89,13 @@ static void wifi_csi_rx_cb(void *ctx, wifi_csi_info_t *info)
 #endif
 
     if (!s_csi_recv_queue) {
+        ESP_LOGW(TAG, "<%s> s_csi_recv_queue is not initialized", esp_err_to_name(ESP_ERR_INVALID_STATE));
         return;
     }
 
     csi_recv_queue_t *csi_send_queuedata = (csi_recv_queue_t *)calloc(1, sizeof(csi_recv_queue_t));
     if (!csi_send_queuedata) {
+        ESP_LOGW(TAG, "Failed to allocate memory for csi_send_queuedata");
         return;
     }
 
@@ -569,14 +572,21 @@ bool RadarCSI::pushData(const csi_data_t &data)
 {
     // 如果当前不处理数据（应用未打开或已退出），直接丢弃，不入队
     if (is_processing_stopped || csi_display_queue == nullptr) {
+        ESP_LOGW(TAG, "is_processing_stopped: %d, csi_display_queue: %p", is_processing_stopped, csi_display_queue);
         return false;
     }
+
+    // 处理 CSI 图表数据
+    processData();
+    // 处理 ScreenM 图表数据
+    processChartMData();
     
     if (xQueueSend(csi_display_queue, &data, 0) != pdTRUE) {
         // 队列已满时，丢弃最旧的数据，再尝试写入最新数据，避免一直处于 full 状态
         csi_data_t dummy;
         (void)xQueueReceive(csi_display_queue, &dummy, 0);
         (void)xQueueSend(csi_display_queue, &data, 0);
+        // ESP_LOGW(TAG, "xQueueSend failed");
         return false;
     }
     
@@ -595,16 +605,20 @@ void RadarCSI::processData()
     while (xQueueReceive(csi_display_queue, &csi_display_data, 0) == pdTRUE) {
         // 如果已停止处理，只清空队列，不更新UI
         if (is_processing_stopped) {
+            ESP_LOGW(TAG, "Processing stopped");
             continue;
         }
-        
+
+        ESP_LOGW(TAG, "Processing data");
         UBaseType_t queueLength = uxQueueMessagesWaiting(csi_display_queue);
         if (queueLength > 10) {
             ESP_LOGW(TAG, "UI queue length: %d", queueLength);
         }
         
         // 更新图表（包括正常数据和定时器补充的数据）
+        esp_lv_adapter_lock(-1);
         updateChart(csi_display_data);
+        esp_lv_adapter_unlock();
     }
 }
 

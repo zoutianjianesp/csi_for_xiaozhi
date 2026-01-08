@@ -42,7 +42,12 @@ static bool main_ui_page_switch_callback(const char *target_page, void *user_dat
     if (target_page != NULL && strcmp(target_page, "SCREEN_W") == 0 &&
             (current_page == NULL || strcmp(current_page, "SCREEN_W") != 0)) {
         ESP_LOGI(TAG, "Start Pinging!");
+        RadarCSI::getInstance()->init();
+        RadarCSI::getInstance()->initCharts();
+        // 恢复数据处理
+        RadarCSI::getInstance()->resumeDataProcessing();
         RadarCSI::getInstance()->startPing();
+        RadarCSI::getInstance()->startPipeline();
     }
     if (current_page != NULL && strcmp(current_page, "SCREEN_W") == 0 &&
         (target_page == NULL || strcmp(target_page, "SCREEN_W") != 0)) {
