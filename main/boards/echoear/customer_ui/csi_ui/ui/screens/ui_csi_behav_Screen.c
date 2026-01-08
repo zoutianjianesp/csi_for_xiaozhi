@@ -309,11 +309,6 @@ lv_obj_t *ui_csi_behav_Screen_screen_init(lv_obj_t *parent)
     uic_csi_day_rigt_lab = ui_csi_day_rigt_lab;
     uic_csi_behav_lab = ui_csi_behav_lab;
 
-    // lv_obj_update_layout(ui_csi_behav_Screen);
-
-    /* 默认隐藏，由页面管理器控制显示 */
-    lv_obj_add_flag(ui_csi_behav_Screen, LV_OBJ_FLAG_HIDDEN);
-
     return ui_csi_behav_Screen;
 }
 

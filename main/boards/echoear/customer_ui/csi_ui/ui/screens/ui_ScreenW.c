@@ -152,9 +152,6 @@ lv_obj_t *ui_ScreenW_screen_init(lv_obj_t *parent)
     lv_obj_set_style_text_font(ui_ScreenW_LabelPointSelect, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 
-    /* 默认隐藏，由页面管理器控制显示 */
-    lv_obj_add_flag(ui_ScreenW, LV_OBJ_FLAG_HIDDEN);
-
     /* Create timer for periodic updates */
     s_screenw_ui.timer = lv_timer_create(timer_tick_cb, TIMER_UPDATE_PERIOD_MS, &s_screenw_ui);
 

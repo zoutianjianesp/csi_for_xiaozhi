@@ -188,7 +188,5 @@ lv_obj_t *alarm_muyu_create_with_parent(lv_obj_t *parent)
                     LV_ALIGN_BOTTOM_MID, 0, 30);
 
     lv_obj_add_event_cb(s_muyuplay_ui.muyu_img, muyu_img_event_handler, LV_EVENT_CLICKED, NULL);
-    lv_obj_update_layout(s_muyuplay_ui.container);
-    lv_obj_add_flag(s_muyuplay_ui.container, LV_OBJ_FLAG_HIDDEN);
     return s_muyuplay_ui.container;
 }

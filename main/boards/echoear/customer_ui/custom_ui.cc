@@ -62,26 +62,26 @@ void custom_ui_create(void)
 {
     lv_obj_t *scr = lv_scr_act();
     /* Create and register pomodoro container */
-    // container_pomodoro = alarm_pomodoro_create_with_parent(scr);
-    // ui_bridge_register_page(PAGE_POMODORO, &container_pomodoro, true);
+    container_pomodoro = alarm_pomodoro_create_with_parent(NULL);
+    ui_bridge_register_page(PAGE_POMODORO, &container_pomodoro, true);
 
-    // /* Create and register sleep container */
-    // container_sleep = alarm_sleep_24h_create_with_parent(scr);
-    // ui_bridge_register_page(PAGE_SLEEP, &container_sleep, true);
+    /* Create and register sleep container */
+    container_sleep = alarm_sleep_24h_create_with_parent(NULL);
+    ui_bridge_register_page(PAGE_SLEEP, &container_sleep, true);
 
-    // /* Create and register muuyu container */
-    // container_muyu = alarm_muyu_create_with_parent(scr);
-    // ui_bridge_register_page(PAGE_MUYU, &container_muyu, true);
+    /* Create and register muuyu container */
+    container_muyu = alarm_muyu_create_with_parent(NULL);
+    ui_bridge_register_page(PAGE_MUYU, &container_muyu, true);
 
-    // /* Create and register time up container */
-    // container_time_up = alarm_time_up_create_with_parent(scr);
-    // ui_bridge_register_page(PAGE_TIME_UP, &container_time_up, false);
+    /* Create and register time up container */
+    container_time_up = alarm_time_up_create_with_parent(NULL);
+    ui_bridge_register_page(PAGE_TIME_UP, &container_time_up, false);
     /* Create and register screenW container */
-    container_screenW = ui_ScreenW_init(scr);
+    container_screenW = ui_ScreenW_screen_init(NULL);
     ui_bridge_register_page("SCREEN_W", &container_screenW, true);
 
     /* Create and register csi_light container */
-    container_csi_behav = ui_csi_behav_init(scr);
+    container_csi_behav = ui_csi_behav_Screen_screen_init(NULL);
     ui_bridge_register_page("CSI_BEHAV", &container_csi_behav, true);
 
     /* Register page switch callback for custom handling (e.g., pomodoro) */

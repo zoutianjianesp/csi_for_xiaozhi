@@ -538,8 +538,6 @@ lv_obj_t *alarm_sleep_24h_create_with_parent(lv_obj_t *parent)
     ESP_LOGI(TAG, "Sleep 24h UI created: start=%ld° (current time), end=%ld°",
              (long)s_sleep_24h_ui.start_angle, (long)s_sleep_24h_ui.end_angle);
 
-    lv_obj_add_flag(s_sleep_24h_ui.container, LV_OBJ_FLAG_HIDDEN);
-
     return s_sleep_24h_ui.container;
 }
 

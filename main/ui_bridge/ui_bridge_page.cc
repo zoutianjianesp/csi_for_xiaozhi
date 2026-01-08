@@ -182,9 +182,11 @@ void ui_bridge_switch_page(const char *page_id)
         lv_obj_t *container = *node->container;
         if (container != NULL) {
             if (node->page_id != NULL && strcmp(node->page_id, page_id) == 0) {
-                lv_obj_clear_flag(container, LV_OBJ_FLAG_HIDDEN);
+                // Load screen with fade-in animation
+                ESP_LOGI(TAG, "Loading screen: %s", node->page_id);
+                lv_screen_load_anim(container, LV_SCR_LOAD_ANIM_FADE_ON, 0, 0, false);
             } else {
-                lv_obj_add_flag(container, LV_OBJ_FLAG_HIDDEN);
+                // lv_obj_add_flag(container, LV_OBJ_FLAG_HIDDEN);
             }
         }
         node = node->next;

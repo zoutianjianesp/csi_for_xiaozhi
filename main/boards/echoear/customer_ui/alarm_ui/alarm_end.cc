@@ -179,7 +179,5 @@ lv_obj_t *alarm_time_up_create_with_parent(lv_obj_t *parent)
 
     lv_obj_move_foreground(s_time_up_ui.slider_label);
 
-    lv_obj_add_flag(s_time_up_ui.container, LV_OBJ_FLAG_HIDDEN);
-
     return s_time_up_ui.container;
 }

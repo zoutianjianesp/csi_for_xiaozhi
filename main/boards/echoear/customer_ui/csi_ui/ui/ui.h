@@ -121,10 +121,6 @@ extern lv_obj_t * ui_csi_behav_lab;
 
 // extern lv_obj_t * ui____initial_actions0;
 LV_IMG_DECLARE(ui_img_979141937);
-// UI INIT
-void ui_init_internal(void);
-lv_obj_t *ui_ScreenW_init(lv_obj_t *parent);
-lv_obj_t *ui_csi_behav_init(lv_obj_t *parent);
 
 #ifdef __cplusplus
 } /*extern "C"*/

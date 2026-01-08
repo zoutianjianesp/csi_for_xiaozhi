@@ -8,6 +8,7 @@
 #include <math.h>
 #include <cstring>
 #include "esp_log.h"
+#include "esp_heap_caps.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -94,9 +95,9 @@ static void wifi_csi_rx_cb(void *ctx, wifi_csi_info_t *info)
         return;
     }
 
-    csi_recv_queue_t *csi_send_queuedata = (csi_recv_queue_t *)calloc(1, sizeof(csi_recv_queue_t));
+    csi_recv_queue_t *csi_send_queuedata = (csi_recv_queue_t *)heap_caps_calloc(1, sizeof(csi_recv_queue_t), MALLOC_CAP_SPIRAM);
     if (!csi_send_queuedata) {
-        ESP_LOGW(TAG, "Failed to allocate memory for csi_send_queuedata");
+        ESP_LOGW(TAG, "Failed to allocate memory for csi_send_queuedata in PSRAM");
         return;
     }
 
@@ -223,7 +224,7 @@ static void process_csi_data_task(void *pvParameter)
             radar->pushData(data);
         }
 
-        free(csi_recv_queue_data);
+        heap_caps_free(csi_recv_queue_data);
     }
 }
 
@@ -236,7 +237,7 @@ esp_err_t wifi_ping_router_stop(void);
 esp_err_t wifi_ping_router_start(void)
 {
     ESP_LOGW(TAG, "wifi_ping_router_start");
-    
+
     // 如果已经在运行，先停止
     if (s_ping_handle != NULL) {
         ESP_LOGW(TAG, "Ping already running, stopping first");
@@ -281,41 +282,41 @@ static void radar_csi_start_pipeline()
     }
     // 等待主工程把 Wi‑Fi STA 连上 AP，并拿到 IP 之后再启动 CSI
     xTaskCreate(
-        [](void *pv) {
-            // 轮询检查是否已经连上 AP 并获取到 IP
-            while (1) {
-                esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
-                if (netif) {
-                    esp_netif_ip_info_t ip_info;
-                    if (esp_netif_get_ip_info(netif, &ip_info) == ESP_OK && ip_info.ip.addr != 0) {
-                        // 已经获取到 IP，说明 Wi‑Fi 已经连上 AP
-                        ESP_LOGI(TAG, "WiFi STA connected, got IP: " IPSTR, IP2STR(&ip_info.ip));
+    [](void *pv) {
+        // 轮询检查是否已经连上 AP 并获取到 IP
+        while (1) {
+            esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+            if (netif) {
+                esp_netif_ip_info_t ip_info;
+                if (esp_netif_get_ip_info(netif, &ip_info) == ESP_OK && ip_info.ip.addr != 0) {
+                    // 已经获取到 IP，说明 Wi‑Fi 已经连上 AP
+                    ESP_LOGI(TAG, "WiFi STA connected, got IP: " IPSTR, IP2STR(&ip_info.ip));
 
-                        // 初始化 CSI（注册 csicb，开始采集）
-                        radar_wifi_csi_init();
+                    // 初始化 CSI（注册 csicb，开始采集）
+                    radar_wifi_csi_init();
 
-                        // 注意：不在这里自动启动 ping，而是由应用根据当前页面决定是否启动 ping
-                        // 开始 ping 路由器，产生稳定的 CSI 数据流量
-                        // extern esp_err_t wifi_ping_router_start(void);
-                        // wifi_ping_router_start();
+                    // 注意：不在这里自动启动 ping，而是由应用根据当前页面决定是否启动 ping
+                    // 开始 ping 路由器，产生稳定的 CSI 数据流量
+                    // extern esp_err_t wifi_ping_router_start(void);
+                    // wifi_ping_router_start();
 
-                        s_csi_pipeline_started = true;
+                    s_csi_pipeline_started = true;
 
-                        // 创建 CSI 处理任务，把采样数据转成 cir/pha 并喂给 UI
-                        xTaskCreate(process_csi_data_task, "process_csi_data_task", 4096, NULL, 6, NULL);
+                    // 创建 CSI 处理任务，把采样数据转成 cir/pha 并喂给 UI
+                    xTaskCreate(process_csi_data_task, "process_csi_data_task", 4096, NULL, 6, NULL);
 
-                        ESP_LOGI(TAG, "CSI pipeline started (without auto-ping)");
-                        vTaskDelete(NULL);
-                    }
+                    ESP_LOGI(TAG, "CSI pipeline started (without auto-ping)");
+                    vTaskDelete(NULL);
                 }
-                vTaskDelay(pdMS_TO_TICKS(1000));
             }
-        },
-        "csi_wait_wifi",
-        4096,
-        nullptr,
-        5,
-        nullptr);
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
+    },
+    "csi_wait_wifi",
+    4096,
+    nullptr,
+    5,
+    nullptr);
 }
 
 // ------------------------ RadarCSI 类实现 ------------------------
@@ -360,7 +361,7 @@ RadarCSI::RadarCSI():
     memset(y_range, 0, sizeof(y_range));
     memset(avg_buffer, 0, sizeof(avg_buffer));
     memset(&last_data, 0, sizeof(last_data));
-    
+
     memset(chart_m_range, 0, sizeof(chart_m_range));
     memset(chart_m_y_range, 0, sizeof(chart_m_y_range));
     memset(chart_m_avg_buffer, 0, sizeof(chart_m_avg_buffer));
@@ -394,7 +395,7 @@ bool RadarCSI::init()
             return false;
         }
     }
-    
+
     // 创建 ScreenM 图表数据队列
     if (!chart_m_queue) {
         chart_m_queue = xQueueCreate(20, sizeof(uint16_t));
@@ -431,7 +432,7 @@ void RadarCSI::initCharts()
     if (chart_initialized) {
         return;
     }
-    
+
     // 初始化波形图表 (ui_ScreenW_Chart) - 单条曲线
     if (ui_ScreenW_Chart) {
         lv_chart_set_range(ui_ScreenW_Chart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
@@ -441,7 +442,7 @@ void RadarCSI::initCharts()
         // 禁止滚动
         lv_obj_clear_flag(ui_ScreenW_Chart, LV_OBJ_FLAG_SCROLLABLE);
     }
-    
+
     // 创建25ms定时器，用于在数据更新超时时补充数据
     if (!update_timer) {
         esp_timer_create_args_t timer_args = {
@@ -453,20 +454,19 @@ void RadarCSI::initCharts()
         };
         esp_timer_create(&timer_args, &update_timer);
     }
-    
+
     chart_initialized = true;
     chart_count = 0;
-    
+
     ESP_LOGI(TAG, "Charts initialized with 25ms update timer");
 }
-
 
 void RadarCSI::doUpdateChart(const csi_data_t &data, bool reset_timer)
 {
     if (!chart_initialized) {
         return;
     }
-    
+
     // 最近 AVG_WINDOW 个点做简单滑动平均滤波，平滑振幅波形
     avg_buffer[avg_index] = data.cir;
     avg_index = (avg_index + 1) % AVG_WINDOW;
@@ -482,7 +482,7 @@ void RadarCSI::doUpdateChart(const csi_data_t &data, bool reset_timer)
 
     // 存储滤波后的当前数据点（单通道）
     range[chart_count] = cir_avg * 5;
-    
+
     // 计算Y轴范围
     y_range[0] = 500;
     y_range[1] = 0;
@@ -518,13 +518,13 @@ void RadarCSI::doUpdateChart(const csi_data_t &data, bool reset_timer)
     if (ui_ScreenW_Chart && ser) {
         lv_chart_set_next_value(ui_ScreenW_Chart, ser, (uint16_t)(range[chart_count]));
         lv_chart_set_range(ui_ScreenW_Chart, LV_CHART_AXIS_PRIMARY_Y, y_range[0], y_range[1]);
-        
+
         // 同步更新Y轴刻度标签的范围
         if (ui_ScreenW_Chart_Yaxis1) {
             lv_scale_set_range(ui_ScreenW_Chart_Yaxis1, y_range[0], y_range[1]);
         }
     }
-    
+
     // 更新计数器
     chart_count++;
     if (chart_count >= LVGL_CHART_POINTS) {
@@ -538,14 +538,14 @@ void RadarCSI::updateChart(const csi_data_t &data)
         ESP_LOGW(TAG, "Charts not initialized");
         return;
     }
-    
+
     // 检查是否是补充的数据（与上次数据相同）
     bool is_supplemented = (memcmp(&last_data, &data, sizeof(csi_data_t)) == 0);
-    
+
     // 如果是新数据，保存并重置定时器
     if (!is_supplemented) {
         memcpy(&last_data, &data, sizeof(csi_data_t));
-        
+
         // 重置定时器 - 25ms内没有新数据将触发补充
         if (update_timer) {
             esp_timer_stop(update_timer);
@@ -557,14 +557,14 @@ void RadarCSI::updateChart(const csi_data_t &data)
             esp_timer_stop(update_timer);
             esp_timer_start_once(update_timer, 25000);
         }
-        
+
         // 周期性打印补充日志（降低频率避免刷屏）
         static int s_supplement_count = 0;
         if ((s_supplement_count++ % 20) == 0) {
             ESP_LOGD(TAG, "Supplemented last data to prevent waveform freeze");
         }
     }
-    
+
     // 执行实际的图表更新
     doUpdateChart(data, true);
 }
@@ -577,11 +577,6 @@ bool RadarCSI::pushData(const csi_data_t &data)
         return false;
     }
 
-    // // // 处理 CSI 图表数据
-    // processData();
-    // // // 处理 ScreenM 图表数据
-    // processChartMData();
-    
     if (xQueueSend(csi_display_queue, &data, 0) != pdTRUE) {
         // 队列已满时，丢弃最旧的数据，再尝试写入最新数据，避免一直处于 full 状态
         csi_data_t dummy;
@@ -589,7 +584,7 @@ bool RadarCSI::pushData(const csi_data_t &data)
         (void)xQueueSend(csi_display_queue, &data, 0);
         return false;
     }
-    
+
     return true;
 }
 
@@ -599,9 +594,9 @@ void RadarCSI::processData()
         ESP_LOGE(TAG, "CSI display queue not initialized");
         return;
     }
-    
+
     csi_data_t csi_display_data;
-    
+
     while (xQueueReceive(csi_display_queue, &csi_display_data, 0) == pdTRUE) {
         // 如果已停止处理，只清空队列，不更新UI
         if (is_processing_stopped) {
@@ -613,7 +608,7 @@ void RadarCSI::processData()
         if (queueLength > 10) {
             ESP_LOGW(TAG, "UI queue length: %d", queueLength);
         }
-        
+
         // 更新图表（包括正常数据和定时器补充的数据）
         esp_lv_adapter_lock(-1);
         updateChart(csi_display_data);
@@ -640,7 +635,7 @@ void RadarCSI::initChartM()
     if (chart_m_initialized) {
         return;
     }
-    
+
     // 初始化 ScreenM 图表
     if (ui_ScreenM_Chart) {
         lv_chart_set_range(ui_ScreenM_Chart, LV_CHART_AXIS_PRIMARY_Y, 0, 100);
@@ -650,10 +645,10 @@ void RadarCSI::initChartM()
         // 禁止滚动
         lv_obj_clear_flag(ui_ScreenM_Chart, LV_OBJ_FLAG_SCROLLABLE);
     }
-    
+
     chart_m_initialized = true;
     chart_m_count = 0;
-    
+
     ESP_LOGI(TAG, "Chart M initialized");
 }
 
@@ -662,7 +657,7 @@ bool RadarCSI::pushChartMData(uint16_t value)
     if (chart_m_queue == nullptr) {
         return false;
     }
-    
+
     if (xQueueSend(chart_m_queue, &value, 0) != pdTRUE) {
         // 队列已满时，丢弃最旧的数据，再尝试写入最新数据
         uint16_t dummy;
@@ -670,7 +665,7 @@ bool RadarCSI::pushChartMData(uint16_t value)
         (void)xQueueSend(chart_m_queue, &value, 0);
         return false;
     }
-    
+
     return true;
 }
 
@@ -680,7 +675,7 @@ void RadarCSI::updateChartM(uint16_t value)
         ESP_LOGW(TAG, "Chart M not initialized");
         return;
     }
-    
+
     // 滑动平均滤波
     chart_m_avg_buffer[chart_m_avg_index] = (float)value;
     chart_m_avg_index = (chart_m_avg_index + 1) % CHART_M_AVG_WINDOW;
@@ -696,7 +691,7 @@ void RadarCSI::updateChartM(uint16_t value)
 
     // 存储滤波后的数据点
     chart_m_range[chart_m_count] = value_avg;
-    
+
     // 计算Y轴范围
     chart_m_y_range[0] = 65535;  // min
     chart_m_y_range[1] = 0;      // max
@@ -708,7 +703,7 @@ void RadarCSI::updateChartM(uint16_t value)
             chart_m_y_range[1] = chart_m_range[i];
         }
     }
-    
+
     // 确保Y轴范围至少为30
     uint8_t y_range_size = 200;
     if ((chart_m_y_range[1] - chart_m_y_range[0]) < y_range_size) {
@@ -737,7 +732,7 @@ void RadarCSI::updateChartM(uint16_t value)
             lv_scale_set_range(ui_ScreenM_Chart_Yaxis1, chart_m_y_range[0], chart_m_y_range[1]);
         }
     }
-    
+
     // 更新计数器
     chart_m_count++;
     if (chart_m_count >= CHART_M_POINTS) {
@@ -750,12 +745,12 @@ void RadarCSI::processChartMData()
     if (!chart_m_queue) {
         return;
     }
-    
+
     uint16_t value;
     while (xQueueReceive(chart_m_queue, &value, 0) == pdTRUE) {
         updateChartM(value);
     }
-    
+
     // 批量更新后刷新一次
     if (ui_ScreenM_Chart && chart_series_m) {
         lv_chart_refresh(ui_ScreenM_Chart);
@@ -765,12 +760,12 @@ void RadarCSI::processChartMData()
 void RadarCSI::stopDataProcessing()
 {
     is_processing_stopped = true;
-    
+
     // 停止定时器
     if (update_timer) {
         esp_timer_stop(update_timer);
     }
-    
+
     // 清空队列中的所有数据
     if (csi_display_queue) {
         csi_data_t dummy_data;
@@ -778,7 +773,7 @@ void RadarCSI::stopDataProcessing()
             // 只是清空队列
         }
     }
-    
+
     ESP_LOGI(TAG, "Data processing stopped");
 }
 
@@ -794,12 +789,12 @@ void RadarCSI::resetChartState()
     if (update_timer) {
         esp_timer_stop(update_timer);
     }
-    
+
     // 重置图表相关状态
     chart_initialized = false;
     chart_count = 0;
     ser = nullptr;
-    
+
     // 重置滤波器状态
     avg_index = 0;
     avg_count = 0;
@@ -807,7 +802,7 @@ void RadarCSI::resetChartState()
     memset(range, 0, sizeof(range));
     memset(y_range, 0, sizeof(y_range));
     memset(&last_data, 0, sizeof(last_data));
-    
+
     ESP_LOGI(TAG, "Chart state reset");
 }
 
@@ -815,14 +810,13 @@ void RadarCSI::resetChartState()
 
 // C interface implementations
 extern "C" {
-void radar_csi_process_data(void)
-{
-    esp_brookesia::apps::RadarCSI::getInstance()->processData();
-}
+    void radar_csi_process_data(void)
+    {
+        esp_brookesia::apps::RadarCSI::getInstance()->processData();
+    }
 
-void radar_csi_process_chart_m_data(void)
-{
-    esp_brookesia::apps::RadarCSI::getInstance()->processChartMData();
+    void radar_csi_process_chart_m_data(void)
+    {
+        esp_brookesia::apps::RadarCSI::getInstance()->processChartMData();
+    }
 }
-}
-

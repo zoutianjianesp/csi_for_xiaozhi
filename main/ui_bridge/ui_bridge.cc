@@ -42,8 +42,7 @@ void ui_bridge_init(emote::EmoteDisplay *display)
     }
 
     /* Create base emote UI container */
-    lv_obj_t *scr = lv_scr_act();
-    s_base_container = lv_obj_create(scr);
+    s_base_container = lv_obj_create(NULL);
     lv_obj_remove_style_all(s_base_container);
     lv_obj_set_size(s_base_container, DISPLAY_WIDTH, DISPLAY_HEIGHT);
     lv_obj_align(s_base_container, LV_ALIGN_TOP_LEFT, 0, 0);
@@ -55,9 +54,9 @@ void ui_bridge_init(emote::EmoteDisplay *display)
     ui_bridge_register_page(UI_BRIDGE_PAGE_HOME, &s_base_container, true);
     ui_bridge_switch_page(UI_BRIDGE_PAGE_HOME);  /* Set as default page */
 
-    s_center_icon = lv_obj_create(scr);
+    s_center_icon = lv_obj_create(s_base_container);
     lv_obj_remove_style_all(s_center_icon);
-    lv_obj_set_size(s_center_icon, 100, 100);
+    lv_obj_set_size(s_center_icon, 150, 150);
     lv_obj_align(s_center_icon, LV_ALIGN_CENTER, 0, 0);  /* Center the icon */
     lv_obj_set_style_bg_opa(s_center_icon, LV_OPA_TRANSP, 0);
     lv_obj_clear_flag(s_center_icon, LV_OBJ_FLAG_SCROLLABLE);

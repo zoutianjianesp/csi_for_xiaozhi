@@ -193,31 +193,3 @@ void ui_event_ScreenS_SliderLight(lv_event_t * e)
         ScreenSSliderLight_function(e);
     }
 }
-
-///////////////////// SCREENS ////////////////////
-
-void ui_init_internal(void)
-{
-    lv_disp_t * dispp = lv_display_get_default();
-    lv_theme_t * theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED),
-                                               false, LV_FONT_DEFAULT);
-    lv_disp_set_theme(dispp, theme);
-    //ui_ScreenW_screen_init();
-    ui_ScreenWP_screen_init();
-    ui_ScreenM_screen_init();
-    ui_ScreenS_screen_init();
-    ui____initial_actions0 = lv_obj_create(NULL);
-    lv_disp_load_scr(ui_ScreenWP);
-}
-
-lv_obj_t *ui_ScreenW_init(lv_obj_t *parent){
-              
-    return ui_ScreenW_screen_init(parent);
-}
-
-lv_obj_t *ui_csi_behav_init(lv_obj_t *parent){     
-    // lv_disp_t * dispp = lv_display_get_default();
-    // lv_theme_t * theme = lv_theme_simple_init(dispp);
-    // lv_disp_set_theme(dispp, theme);
-    return ui_csi_behav_Screen_screen_init(parent);
-}
