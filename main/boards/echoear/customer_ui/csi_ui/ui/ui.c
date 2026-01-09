@@ -114,9 +114,6 @@ lv_obj_t * ui_csi_day_rigt_lab = NULL;
 lv_obj_t * ui_csi_behav_lab = NULL;
 // CUSTOM VARIABLES
 
-// EVENTS
-static lv_obj_t * ui____initial_actions0;
-
 // IMAGES AND IMAGE SETS
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////

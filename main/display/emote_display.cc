@@ -94,9 +94,9 @@ static emote_handle_t InitializeEmote(const esp_lcd_panel_handle_t panel, const 
         },
         .task = {
             .task_priority = 5,
-            .task_stack = 8 * 1024,
+            .task_stack = 6 * 1024,
             .task_affinity = 0,
-            .task_stack_in_ext = false,
+            .task_stack_in_ext = true,
         },
         .flush_cb = OnFlushCallback,
     };

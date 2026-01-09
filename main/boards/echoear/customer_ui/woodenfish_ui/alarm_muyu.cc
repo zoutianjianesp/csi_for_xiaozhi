@@ -5,14 +5,12 @@
  */
 
 #include "lvgl.h"
-#include "lv_eaf.h"
 #include "esp_log.h"
 #include <stdio.h>
 #include <math.h>
 #include <string.h>  /* For strcmp */
 #include "application.h"
 #include "assets/lang_config.h"
-#include "alarm_api.h"
 #include "custom_ui.h"
 #include "ui_helpers.h"
 

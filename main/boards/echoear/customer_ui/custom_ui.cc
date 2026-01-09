@@ -28,7 +28,7 @@ static lv_obj_t *container_csi_behav = NULL;
 // Global Variables
 // ============================================================================
 
-static bool main_ui_page_switch_callback(const char *target_page, void *user_data)
+static bool custom_ui_page_switch_callback(const char *target_page, void *user_data)
 {
     const char *current_page = ui_bridge_get_current_page();
     ESP_LOGI(TAG, "Page switch: %s -> %s", current_page ? current_page : "NULL", target_page ? target_page : "NULL");
@@ -60,7 +60,6 @@ static bool main_ui_page_switch_callback(const char *target_page, void *user_dat
 
 void custom_ui_create(void)
 {
-    lv_obj_t *scr = lv_scr_act();
     /* Create and register pomodoro container */
     container_pomodoro = alarm_pomodoro_create_with_parent(NULL);
     ui_bridge_register_page(PAGE_POMODORO, &container_pomodoro, true);
@@ -85,5 +84,5 @@ void custom_ui_create(void)
     ui_bridge_register_page("CSI_BEHAV", &container_csi_behav, true);
 
     /* Register page switch callback for custom handling (e.g., pomodoro) */
-    ui_bridge_set_page_switch_callback(main_ui_page_switch_callback, NULL);
+    ui_bridge_set_page_switch_callback(custom_ui_page_switch_callback, NULL);
 }
