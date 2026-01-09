@@ -129,29 +129,6 @@ lv_obj_t *ui_ScreenW_screen_init(lv_obj_t *parent)
     lv_obj_set_style_text_font(ui_ScreenW_LabelTitle, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_radius(ui_ScreenW_LabelTitle, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_ScreenW_LabelPoint = lv_label_create(ui_ScreenW);
-    lv_obj_set_width(ui_ScreenW_LabelPoint, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_ScreenW_LabelPoint, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_ScreenW_LabelPoint, 0);
-    lv_obj_set_y(ui_ScreenW_LabelPoint, 147);
-    lv_obj_set_align(ui_ScreenW_LabelPoint, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_ScreenW_LabelPoint, "....");
-    lv_obj_set_style_text_color(ui_ScreenW_LabelPoint, lv_color_hex(0x393838), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_ScreenW_LabelPoint, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_ScreenW_LabelPoint, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_ScreenW_LabelPointSelect = lv_label_create(ui_ScreenW);
-    lv_obj_set_width(ui_ScreenW_LabelPointSelect, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_ScreenW_LabelPointSelect, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_ScreenW_LabelPointSelect, -17);
-    lv_obj_set_y(ui_ScreenW_LabelPointSelect, 147);
-    lv_obj_set_align(ui_ScreenW_LabelPointSelect, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_ScreenW_LabelPointSelect, ".");
-    lv_obj_set_style_text_color(ui_ScreenW_LabelPointSelect, lv_color_hex(0x9D9D9D), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_ScreenW_LabelPointSelect, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_ScreenW_LabelPointSelect, &lv_font_montserrat_48, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-
     /* Create timer for periodic updates */
     s_screenw_ui.timer = lv_timer_create(timer_tick_cb, TIMER_UPDATE_PERIOD_MS, &s_screenw_ui);
 

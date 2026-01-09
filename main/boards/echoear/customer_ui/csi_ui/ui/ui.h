@@ -24,8 +24,6 @@ extern lv_obj_t * ui_ScreenW_Chart_Xaxis;
 extern lv_obj_t * ui_ScreenW_Chart_Yaxis1;
 extern lv_obj_t * ui_ScreenW_Chart_Yaxis2;
 extern lv_obj_t * ui_ScreenW_LabelTitle;
-extern lv_obj_t * ui_ScreenW_LabelPoint;
-extern lv_obj_t * ui_ScreenW_LabelPointSelect;
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenWP

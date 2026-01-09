@@ -14,7 +14,7 @@
 #define TAG "main"
 
 
-#define MEMORY_MONITOR 1
+#define MEMORY_MONITOR 0
 
 #if MEMORY_MONITOR
 
@@ -176,9 +176,6 @@ static void sys_monitor_start(void)
 
 extern "C" void app_main(void)
 {
-    print_memory_info();
-    vTaskDelay(pdMS_TO_TICKS(1000));
-
     // Initialize the default event loop
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 

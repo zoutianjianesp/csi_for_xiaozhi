@@ -18,8 +18,6 @@ lv_obj_t * ui_ScreenW_Chart_Xaxis;
 lv_obj_t * ui_ScreenW_Chart_Yaxis1;
 lv_obj_t * ui_ScreenW_Chart_Yaxis2;
 lv_obj_t * ui_ScreenW_LabelTitle;
-lv_obj_t * ui_ScreenW_LabelPoint;
-lv_obj_t * ui_ScreenW_LabelPointSelect;
 // CUSTOM VARIABLES
 
 
