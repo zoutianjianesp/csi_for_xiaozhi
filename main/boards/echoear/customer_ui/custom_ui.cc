@@ -6,7 +6,7 @@
 #include "csi_ui/ui/ui.h"
 #include "../esp_radar_csi.h"
 
-#define TAG "alarm_controller"
+#define TAG "custom_ui"
 
 // ============================================================================
 // Type Definitions
@@ -31,7 +31,6 @@ static lv_obj_t *container_csi_behav = NULL;
 static bool custom_ui_page_switch_callback(const char *target_page, void *user_data)
 {
     const char *current_page = ui_bridge_get_current_page();
-    ESP_LOGI(TAG, "Page switch: %s -> %s", current_page ? current_page : "NULL", target_page ? target_page : "NULL");
 
     /* Special handling for pomodoro page */
     if (target_page != NULL && strcmp(target_page, PAGE_POMODORO) == 0 &&

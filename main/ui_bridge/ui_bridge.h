@@ -14,7 +14,7 @@
 
 #ifdef __cplusplus
 namespace emote {
-    class EmoteDisplay;
+class EmoteDisplay;
 }
 extern "C" {
 #endif

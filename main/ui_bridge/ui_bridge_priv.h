@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 /* Forward declaration */
 namespace emote {
-    class EmoteDisplay;
+class EmoteDisplay;
 }
 extern "C" {
 #endif
@@ -23,10 +23,6 @@ extern "C" {
 /* Gesture detection constants (internal) */
 #define UI_BRIDGE_GESTURE_LONG_PRESS_TIME_MS     500      /* Long press duration in milliseconds */
 #define UI_BRIDGE_GESTURE_SWIPE_THRESHOLD        30       /* Minimum distance for swipe detection */
-
-/* Gesture start position validation constants (internal) */
-#define UI_BRIDGE_EDGE_THRESHOLD                 30       /* Distance from edge to be considered edge region */
-#define UI_BRIDGE_CENTER_RANGE                   50       /* Range around center (±50 pixels) */
 
 /**
  * @brief Gesture event types (internal)

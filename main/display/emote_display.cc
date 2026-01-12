@@ -64,6 +64,7 @@ static void OnFlushCallback(int x_start, int y_start, int x_end, int y_end, cons
                 disp, x_start, y_start, x_end, y_end, data, true);
         }
     }
+    // ESP_LOGI(TAG, "OnFlushCallback: x_start: %d, y_start: %d, x_end: %d, y_end: %d", x_start, y_start, x_end, y_end);
     emote_notify_flush_finished(manager);
 }
 
