@@ -53,26 +53,6 @@
         "HELLO_MY_FRIEND": "你好，我的朋友！",
         "CALIBRATING_STEP1": "移动滑块至相反方向",
         "CALIBRATING_STEP2": "取下滑块",
-        "CALIBRATING_STEP3": "校准完成",
-        "PETTING_YOUR_HEAD": "我在摸你猫头",
-        "ALARM_TIMEUP": "闹钟时间到",
-        "POMODORO_TIMEUP": "番茄钟时间到",
-        "WELCOME_FRIEND": "欢迎朋友来了",
-        "SHAKE_HEAD_ACTION":"摇头动作",
-        "SHAKE_HEAD_DECAY_ACTION":"缓慢摇头动作",
-        "LOOK_AROUND_ACTION":"环顾四周动作",
-        "BEAT_SWING_ACTION":"节拍摇摆动作",
-        "CAT_NUZZLE_ACTION":"蹭头撒娇动作",
-        "CALIBRATE_ACTION":"校准底座",
-        "BEAT_DETECT_SET":"鼓点检测模式，跟着音乐跳舞",
-        "DOA_FOLLOW_SET":"DOA 声音方向跟随模式",
-        "DISALED_SET":"禁用音频分析",
-        "START_POMODORO":"开启番茄钟定时器，设置倒计时时间（1-60分钟，默认5分钟）",
-        "CONTROL_POMODORO":"控制番茄钟定时器的运行状态。参数：start-启动定时器，pause-暂停定时器",
-        "START_SLEEP":"设置睡眠闹钟，从当前时间到指定结束时间（24小时制）。开始时间自动为当前时间。参数：end_hour-结束时间的小时（0-23，默认8），end_min-结束时间的分钟（0-59，默认0）",
-        "MERIT":"功德+1",
-        "TODAY_MERIT":"今日功德",
-        "FULL_MERIT":"功德圆满",
-        "SWITCH_HOME":"返回首页"
+        "CALIBRATING_STEP3": "校准完成"
     }
 }

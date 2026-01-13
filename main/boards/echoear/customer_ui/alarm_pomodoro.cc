@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>  /* For strcmp */
-#include "custom_ui.h"
+#include "alarm_manager.h"
 
 #define TIMER_MAX_SECONDS       (60 * 60)
 #define TIMER_INITIAL_SECONDS   (0 * 60)
@@ -264,7 +264,7 @@ static void timer_tick_cb(lv_timer_t *timer)
         if (ui->was_running_before_zero) {
             ESP_LOGI(TAG, "Pomodoro timer finished");
             alarm_time_up_set_origin(PAGE_POMODORO);
-            ui_bridge_switch_page(PAGE_TIME_UP);
+            main_ui_switch_page(PAGE_TIME_UP);
             ui->was_running_before_zero = false;
         } else {
             ESP_LOGI(TAG, "Timer set to 0 manually or initialized to 0 - no jump");
@@ -430,6 +430,8 @@ lv_obj_t *alarm_pomodoro_create_with_parent(lv_obj_t *parent)
     // Create timer to update countdown
     s_pomodoro_ui.timer = lv_timer_create(timer_tick_cb, TIMER_UPDATE_PERIOD_MS, &s_pomodoro_ui);
 
+    lv_obj_add_flag(s_pomodoro_ui.container, LV_OBJ_FLAG_HIDDEN);
+
     return s_pomodoro_ui.container;
 }
 
@@ -478,7 +480,7 @@ void alarm_pomodoro_toggle_start_pause(void)
     const char *current_page = ui_bridge_get_current_page();
     if (current_page == NULL || strcmp(current_page, PAGE_POMODORO) != 0) {
         ESP_LOGI(TAG, "Not on pomodoro page (current=%s), switching to pomodoro page", current_page ? current_page : "NULL");
-        ui_bridge_switch_page(PAGE_POMODORO);
+        main_ui_switch_page(PAGE_POMODORO);
     }
 
     esp_lv_adapter_lock(-1);
@@ -546,13 +548,7 @@ void alarm_pomodoro_start(void)
             pomodoro_set_state(&s_pomodoro_ui, TIMER_STATE_RUNNING);
             ESP_LOGI(TAG, "Timer started/resumed");
         } else {
-            // Reset to 5 minutes (300 seconds) when remaining time is 0
-            s_pomodoro_ui.remaining_seconds = 5 * 60;
-            int32_t angle = (360 * s_pomodoro_ui.remaining_seconds) / TIMER_MAX_SECONDS;
-            update_time_from_angle(&s_pomodoro_ui, angle);
-            lv_timer_resume(s_pomodoro_ui.timer);
-            pomodoro_set_state(&s_pomodoro_ui, TIMER_STATE_RUNNING);
-            ESP_LOGI(TAG, "Timer reset to 5 minutes and started");
+            ESP_LOGI(TAG, "Timer cannot start: no remaining time");
         }
     } else {
         ESP_LOGI(TAG, "Timer is already running");
