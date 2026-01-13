@@ -9,8 +9,11 @@
 #include "device_state.h"
 #include <esp_log.h>
 #include <esp_timer.h>
+#include "custom_ui.h"
 
 #define TAG "BaseControl"
+
+const char *current_page = nullptr;
 
 BaseControl::BaseControl(EspS3Cat* board) : board_(board)
 {
@@ -18,6 +21,7 @@ BaseControl::BaseControl(EspS3Cat* board) : board_(board)
     last_heartbeat_time_ = 0;
     heartbeat_check_timer_ = nullptr;
     calibrate_semaphore_ = xSemaphoreCreateBinary();
+
     if (calibrate_semaphore_ == nullptr) {
         ESP_LOGE(TAG, "Failed to create calibrate semaphore");
     }
@@ -72,8 +76,8 @@ void BaseControl::Initialize()
         return;
     }
 
-    // Initialize to offline state
-    echo_base_online_ = false;
+    // Initialize to online state
+    echo_base_online_ = true;
     last_heartbeat_time_ = 0;
 }
 
@@ -86,13 +90,15 @@ void BaseControl::HandleCommand(uint8_t cmd, uint8_t *data, int data_len)
 
     emote::EmoteDisplay* emote_display = dynamic_cast<emote::EmoteDisplay*>(display);
 
-    // if (cmd != ECHO_BASE_CMD_RECV_HEARTBEAT) {
+    if (cmd != ECHO_BASE_CMD_RECV_HEARTBEAT) {
         printf("Handle: cmd=%02X, ", cmd);
         for (int i = 0; i < data_len; i++) {
             printf("%02X ", data[i]);
         }
         printf("\n");
-    // }
+    }
+
+    current_page = ui_bridge_get_current_page();
 
     switch (cmd) {
     case ECHO_BASE_CMD_RECV_SLIDE_SWITCH: {
@@ -102,12 +108,34 @@ void BaseControl::HandleCommand(uint8_t cmd, uint8_t *data, int data_len)
             uint16_t event = (data[0] << 8) | data[1];
             switch (event) {
             case ECHO_BASE_CMD_RECV_SWITCH_SLIDE_DOWN:
-                ESP_LOGI(TAG, "Slide switch down");
-                app.ToggleChatState();
+                ESP_LOGI(TAG, "Slide switch down:%s", current_page);
+                if(strcmp(current_page, PAGE_POMODORO) == 0) {
+                    alarm_resume_pomodoro();
+                }else if(strcmp(current_page, PAGE_SLEEP) == 0) {
+                    alarm_toggle_sleep_duration_display();
+                } else if(strcmp(current_page, PAGE_TIME_UP) == 0) {
+                    alarm_time_up_snooze();
+                }else if(strcmp(current_page, "DUMMY") == 0) {
+                    app.ToggleChatState();
+                }
                 break;
             case ECHO_BASE_CMD_RECV_SWITCH_SLIDE_UP:
-                ESP_LOGI(TAG, "Slide switch up");
-                app.ToggleChatState();
+                ESP_LOGI(TAG, "Slide switch up:%s", current_page);
+                if(strcmp(current_page, PAGE_POMODORO) == 0) {
+                    alarm_pause_pomodoro();
+                } else if(strcmp(current_page, PAGE_SLEEP) == 0) {
+                    alarm_toggle_sleep_duration_display();
+                } else if(strcmp(current_page, PAGE_TIME_UP) == 0) {
+                    alarm_time_up_snooze();
+                } else if(strcmp(current_page, "DUMMY") == 0) {
+                    app.ToggleChatState();
+                }
+                break;
+            case ECHO_BASE_CMD_RECV_SWITCH_SINGLE_CLICK:
+                ESP_LOGI(TAG, "Single click");
+                if (strcmp(current_page, PAGE_MUYU) == 0) {
+                    lvgl_muyu_click();
+                }
                 break;
             case ECHO_BASE_CMD_RECV_CALIBRATE_START:
                 ESP_LOGI(TAG, "Calibrate start");
@@ -126,13 +154,22 @@ void BaseControl::HandleCommand(uint8_t cmd, uint8_t *data, int data_len)
                 break;
             case ECHO_BASE_CMD_RECV_SWITCH_FISH_ATTACHED:
                 ESP_LOGI(TAG, "Fish attached");
-                emote_display->InsertAnimDialog("eat", 3500);
+                if(strcmp(current_page, "DUMMY") == 0) {
+                    emote_display->InsertAnimDialog("eat", 3500);
+                }
                 break;
-            case ECHO_BASE_CMD_RECV_SWITCH_PAIR_DETECT:
+            case ECHO_BASE_CMD_RECV_SWITCH_PAIR_DETECT: {
                 ESP_LOGI(TAG, "Pair detect");
                 emote_display->SetEmotion("happy");
                 echo_base_control_set_action(ECHO_BASE_CMD_SET_ACTION_LOOK_AROUND);
+
+                auto &app = Application::GetInstance();
+                if (app.GetDeviceState() == kDeviceStateIdle) {
+                    std::string wake_word = Lang::Strings::WELCOME_FRIEND;
+                    app.WakeWordInvoke(wake_word);
+                }
                 break;
+            }
             default:
                 ESP_LOGI(TAG, "Slide switch event: %d", event);
                 break;
@@ -169,7 +206,9 @@ void BaseControl::HandleCommand(uint8_t cmd, uint8_t *data, int data_len)
 
             if (was_offline) {
                 ESP_LOGI(TAG, "Echo base connected (reinserted)");
-                emote_display->InsertAnimDialog("insert", 3000);
+                if(strcmp(current_page, "DUMMY") == 0) {
+                    emote_display->InsertAnimDialog("insert", 3500);
+                }
             }
             break;
         }
@@ -198,7 +237,7 @@ void BaseControl::HeartbeatCheckTimerCallback(void* arg)
     int64_t current_time = esp_timer_get_time() / 1000;  // Convert to milliseconds
     int64_t time_since_last_heartbeat = current_time - self->last_heartbeat_time_;
 
-    // Check if heartbeat timeout (2 seconds = 4 missed heartbeats at 500ms interval)
+    // Check if heartbeat timeout (1 seconds = 2 missed heartbeats at 500ms interval)
     if (self->echo_base_online_ && time_since_last_heartbeat > BaseControl::HEARTBEAT_TIMEOUT_MS) {
         self->echo_base_online_ = false;
         ESP_LOGW(TAG, "Echo base disconnected (timeout: %lld ms)", time_since_last_heartbeat);
