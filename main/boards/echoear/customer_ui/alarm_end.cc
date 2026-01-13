@@ -9,10 +9,9 @@
 #include <stdio.h>
 #include <string>
 #include <string.h>
-#include "custom_ui.h"
+#include "alarm_manager.h"
 #include "alarm_api.h"
 #include "alarm_sleep_24h.h"
-#include "assets/lang_config.h"
 #include "application.h"
 
 static const char *TAG = "time_up";
@@ -33,24 +32,18 @@ static void remind_later_btn_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     if (code == LV_EVENT_CLICKED) {
-        alarm_time_up_snooze_impl();
-    }
-}
+        ESP_LOGI(TAG, "Snooze 5 min button clicked");
 
-void alarm_time_up_snooze_impl(void)
-{
-    ESP_LOGI(TAG, "Snooze 5 min triggered");
-
-    if (s_time_up_ui.origin_page != NULL) {
-
-        if (strcmp(s_time_up_ui.origin_page, PAGE_SLEEP) == 0) {
-            alarm_sleep_24h_snooze(5);
-        } else if (strcmp(s_time_up_ui.origin_page, PAGE_POMODORO) == 0) {
-            alarm_start_pomodoro(5);
+        if (s_time_up_ui.origin_page != NULL) {
+            if (strcmp(s_time_up_ui.origin_page, PAGE_SLEEP) == 0) {
+                alarm_sleep_24h_snooze(5);
+            } else if (strcmp(s_time_up_ui.origin_page, PAGE_POMODORO) == 0) {
+                alarm_start_pomodoro(5);
+            }
+            s_time_up_ui.origin_page = NULL;  /* Clear origin after use */
+        } else {
+            main_ui_switch_page(UI_BRIDGE_PAGE_HOME);
         }
-        s_time_up_ui.origin_page = NULL;  /* Clear origin after use */
-    } else {
-        ui_bridge_switch_page(UI_BRIDGE_PAGE_HOME);
     }
 }
 
@@ -63,7 +56,7 @@ static void slider_event_handler(lv_event_t *e)
         int32_t value = lv_slider_get_value(slider);
         if (value >= 100) {
             lv_slider_set_value(slider, 0, LV_ANIM_ON);
-            ui_bridge_switch_page(UI_BRIDGE_PAGE_HOME);
+            main_ui_switch_page(UI_BRIDGE_PAGE_HOME);
         }
     } else if (code == LV_EVENT_RELEASED) {
         int32_t value = lv_slider_get_value(slider);
@@ -89,13 +82,13 @@ void alarm_time_up_set_origin(const char *origin_page)
                 lv_obj_clear_flag(s_time_up_ui.remind_later_time_label, LV_OBJ_FLAG_HIDDEN);
             }
         }
-        std::string wake_word = Lang::Strings::ALARM_TIMEUP;
+        std::string wake_word = "闹钟时间到";
         Application::GetInstance().WakeWordInvoke(wake_word);
     } else if (origin_page != NULL && strcmp(origin_page, PAGE_POMODORO) == 0) {
         if (s_time_up_ui.remind_later_time_label) {
             lv_obj_add_flag(s_time_up_ui.remind_later_time_label, LV_OBJ_FLAG_HIDDEN);
         }
-        std::string wake_word = Lang::Strings::POMODORO_TIMEUP;
+        std::string wake_word = "番茄钟时间到";
         Application::GetInstance().WakeWordInvoke(wake_word);
     }
 }
@@ -178,6 +171,8 @@ lv_obj_t *alarm_time_up_create_with_parent(lv_obj_t *parent)
     lv_obj_add_event_cb(s_time_up_ui.slider, slider_event_handler, LV_EVENT_ALL, NULL);
 
     lv_obj_move_foreground(s_time_up_ui.slider_label);
+
+    lv_obj_add_flag(s_time_up_ui.container, LV_OBJ_FLAG_HIDDEN);
 
     return s_time_up_ui.container;
 }

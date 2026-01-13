@@ -6,34 +6,22 @@
 #include "board.h"
 #include "assets/lang_config.h"
 #include <esp_log.h>
-#include "custom_ui.h"
+#include "customer_ui/alarm_api.h"
 
 #define TAG "EchoEarTools"
 
 void EchoEarTools::Initialize(EspS3Cat* board)
 {
     auto &mcp_server = McpServer::GetInstance();
-    char buffer[1024]; // 确保缓冲区足够大
-    
-    // 使用sprintf将多个字符串拼接成一个完整的JSON格式字符串
-    sprintf(buffer, 
-        "\"Echo base action control. Available actions:\\n\" "
-        "\"shark_head: %s\\n\" "
-        "\"shark_head_decay: %s\\n\" "
-        "\"look_around: %s\\n\" "
-        "\"beat_swing: %s\\n\" "
-        "\"cat_nuzzle: %s\\n\" "
-        "\"calibrate: %s\\n\""
-        "\"go_home: %s\\n\"",
-        Lang::Strings::SHAKE_HEAD_ACTION,
-        Lang::Strings::SHAKE_HEAD_DECAY_ACTION,
-        Lang::Strings::LOOK_AROUND_ACTION,
-        Lang::Strings::BEAT_SWING_ACTION,
-        Lang::Strings::CAT_NUZZLE_ACTION,
-        Lang::Strings::CALIBRATE_ACTION,
-        Lang::Strings::SWITCH_HOME);
+
     // Echo base action control
-    mcp_server.AddTool("self.echo_base.set_action", buffer,
+    mcp_server.AddTool("self.echo_base.set_action", "Echo base action control. Available actions:\n"
+                       "shark_head: 摇头动作\n"
+                       "shark_head_decay: 缓慢摇头动作\n"
+                       "look_around: 环顾四周动作\n"
+                       "beat_swing: 节拍摇摆动作\n"
+                       "cat_nuzzle: 蹭头撒娇动作\n"
+                       "calibrate: 校准底座\n",
     PropertyList({
         Property("action", kPropertyTypeString),
     }), [board](const PropertyList & properties) -> ReturnValue {
@@ -65,9 +53,6 @@ void EchoEarTools::Initialize(EspS3Cat* board)
                     return false;
                 }
             }
-        } else if (action == "go_home")
-        {
-            ui_bridge_switch_page(UI_BRIDGE_PAGE_HOME);
         } else
         {
             return false;
@@ -83,18 +68,12 @@ void EchoEarTools::Initialize(EspS3Cat* board)
         }
         return true;
     });
-    // 使用sprintf将多个字符串拼接成一个完整的JSON格式字符串
-    sprintf(buffer,
-        "\"Set audio analysis mode. Available modes:\\n\" "
-        "\"beat_detection: %s\\n\" "
-        "\"doa_follow: %s\\n\" "
-        "\"disabled: %s\\n\"",
-        Lang::Strings::BEAT_DETECT_SET,
-        Lang::Strings::DOA_FOLLOW_SET,
-        Lang::Strings::DISALED_SET);
 
     // Audio analysis mode control
-    mcp_server.AddTool("self.echo_base.set_audio_mode", buffer,
+    mcp_server.AddTool("self.echo_base.set_audio_mode", "Set audio analysis mode. Available modes:\n"
+                       "beat_detection: 鼓点检测模式，跟着音乐跳舞\n"
+                       "doa_follow: DOA 声音方向跟随模式\n"
+                       "disabled: 禁用音频分析",
     PropertyList({
         Property("mode", kPropertyTypeString),
     }), [board](const PropertyList & properties) -> ReturnValue {
@@ -120,7 +99,7 @@ void EchoEarTools::Initialize(EspS3Cat* board)
     });
 
     // Pomodoro timer control
-    mcp_server.AddTool("self.pomodoro.start", Lang::Strings::START_POMODORO,
+    mcp_server.AddTool("self.pomodoro.start", "开启番茄钟定时器，设置倒计时时间（1-60分钟，默认5分钟）",
     PropertyList({
         Property("minutes", kPropertyTypeInteger, 5, 1, 60),
     }), [](const PropertyList& properties) -> ReturnValue {
@@ -131,7 +110,7 @@ void EchoEarTools::Initialize(EspS3Cat* board)
     });
 
     // Pomodoro timer control (start/pause)
-    mcp_server.AddTool("self.pomodoro.control", Lang::Strings::CONTROL_POMODORO,
+    mcp_server.AddTool("self.pomodoro.control", "控制番茄钟定时器的运行状态。参数：start-启动定时器，pause-暂停定时器",
     PropertyList({
         Property("action", kPropertyTypeString),
     }), [](const PropertyList& properties) -> ReturnValue {
@@ -152,7 +131,7 @@ void EchoEarTools::Initialize(EspS3Cat* board)
     });
 
     // Sleep timer control
-    mcp_server.AddTool("self.sleep.start", Lang::Strings::START_SLEEP,
+    mcp_server.AddTool("self.sleep.start", "设置睡眠闹钟，从当前时间到指定结束时间（24小时制）。开始时间自动为当前时间。参数：end_hour-结束时间的小时（0-23，默认8），end_min-结束时间的分钟（0-59，默认0）",
     PropertyList({
         Property("end_hour", kPropertyTypeInteger, 8, 0, 23),
         Property("end_min", kPropertyTypeInteger, 0, 0, 59),

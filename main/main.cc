@@ -4,7 +4,6 @@
 #include <nvs_flash.h>
 #include <driver/gpio.h>
 #include <esp_event.h>
-#include <esp_heap_caps.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
@@ -128,38 +127,30 @@ exit:    //Common return path
     return ret;
 }
 
-/**
- * @brief 打印系统内存信息（Internal 和 SPIRAM）
- */
-static void print_memory_info(void)
-{
-    ESP_LOGI(TAG, "System Info Trace");
-    printf("\tDescription\tInternal\tSPIRAM\n");
-    printf("Current Free Memory\t%d\t\t%d\n",
-           heap_caps_get_free_size(MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL),
-           heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
-    printf("Largest Free Block\t%d\t\t%d\n",
-           heap_caps_get_largest_free_block(MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL),
-           heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM));
-    printf("Min. Ever Free Size\t%d\t\t%d\n",
-           heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL),
-           heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM));
-}
-
 static void monitor_task(void *arg)
 {
     (void) arg;
     const int STATS_TICKS = pdMS_TO_TICKS(2 * 1000);
 
     while (true) {
-        print_memory_info();
+        ESP_LOGI(TAG, "System Info Trace");
+        printf("\tDescription\tInternal\tSPIRAM\n");
+        printf("Current Free Memory\t%d\t\t%d\n",
+               heap_caps_get_free_size(MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL),
+               heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+        printf("Largest Free Block\t%d\t\t%d\n",
+               heap_caps_get_largest_free_block(MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL),
+               heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM));
+        printf("Min. Ever Free Size\t%d\t\t%d\n",
+               heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL),
+               heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM));
 
-        // printf("Getting real time stats over %d ticks\n", STATS_TICKS);
-        // if (print_real_time_stats(STATS_TICKS) == ESP_OK) {
-        //     printf("Real time stats obtained\n");
-        // } else {
-        //     printf("Error getting real time stats\n");
-        // }
+        printf("Getting real time stats over %d ticks\n", STATS_TICKS);
+        if (print_real_time_stats(STATS_TICKS) == ESP_OK) {
+            printf("Real time stats obtained\n");
+        } else {
+            printf("Error getting real time stats\n");
+        }
 
         vTaskDelay(STATS_TICKS);
     }

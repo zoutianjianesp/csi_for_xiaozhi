@@ -1,9 +1,0 @@
-dependencies:
-  idf:
-    version: '>=5.0'
-  lvgl/lvgl:
-    public: true
-    version: '*'
-  espressif/esp_csi_gain_ctrl: ^0.1.2
-  espressif/iqmath: ^1.11.0
-  espressif/esp_lvgl_adapter: ^0.1.0

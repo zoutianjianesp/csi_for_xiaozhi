@@ -10,7 +10,7 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>  /* For strcmp */
-#include "custom_ui.h"
+#include "alarm_manager.h"
 #include "alarm_api.h"
 #include "alarm_end.h"
 
@@ -268,7 +268,7 @@ static void time_update_timer_cb(lv_timer_t *timer)
         ESP_LOGI(TAG, "Time up, end time: %02ld:%02ld", (long)end_hour, (long)end_min);
         ui->has_jumped_to_time_up = true;
         alarm_time_up_set_origin(PAGE_SLEEP);
-        ui_bridge_switch_page(PAGE_TIME_UP);
+        main_ui_switch_page(PAGE_TIME_UP);
         return;
     } else if (end_total_sec != current_total_sec) {
         ui->has_jumped_to_time_up = false;
@@ -537,6 +537,8 @@ lv_obj_t *alarm_sleep_24h_create_with_parent(lv_obj_t *parent)
 
     ESP_LOGI(TAG, "Sleep 24h UI created: start=%ld° (current time), end=%ld°",
              (long)s_sleep_24h_ui.start_angle, (long)s_sleep_24h_ui.end_angle);
+
+    lv_obj_add_flag(s_sleep_24h_ui.container, LV_OBJ_FLAG_HIDDEN);
 
     return s_sleep_24h_ui.container;
 }

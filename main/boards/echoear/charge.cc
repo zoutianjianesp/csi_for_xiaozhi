@@ -18,7 +18,6 @@ Charge::~Charge()
 
 void Charge::Printcharge()
 {
-    return;
     ReadRegs(0x08, read_buffer_, 2);
     ReadRegs(0x0c, read_buffer_ + 2, 2);
 

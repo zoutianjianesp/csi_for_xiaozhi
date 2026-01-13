@@ -25,6 +25,7 @@
 #define MAIN_EVENT_CHECK_NEW_VERSION_DONE (1 << 5)
 #define MAIN_EVENT_CLOCK_TICK (1 << 6)
 
+
 enum AecMode {
     kAecOff,
     kAecOnDeviceSide,
