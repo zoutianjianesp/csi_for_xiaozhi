@@ -29,8 +29,8 @@ static void timer_tick_cb(lv_timer_t *timer)
         return;
     }
 
-    radar_csi_process_data();
-    radar_csi_process_chart_m_data();
+    //radar_csi_process_data();
+    //radar_csi_process_chart_m_data();
 
     /* Add your periodic update logic here */
     // TODO: Add periodic update logic for ScreenW
